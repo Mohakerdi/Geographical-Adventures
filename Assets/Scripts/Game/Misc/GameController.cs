@@ -46,6 +46,13 @@ public class GameController : MonoBehaviour
 		{
 			// 2x MSAA provides sharp edges while saving significant memory bandwidth over 4x on mobile GPUs
 			QualitySettings.antiAliasing = 2;
+
+			// Force landscape orientation on mobile
+			Screen.autorotateToPortrait = false;
+			Screen.autorotateToPortraitUpsideDown = false;
+			Screen.autorotateToLandscapeLeft = true;
+			Screen.autorotateToLandscapeRight = true;
+			Screen.orientation = ScreenOrientation.LandscapeLeft;
 		}
 	}
 

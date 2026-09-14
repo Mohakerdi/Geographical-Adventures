@@ -82,9 +82,15 @@ namespace GeoGame.InputMobile
 				return;
 			}
 
-			// If first run on Android/mobile, enable touch controls by default
+			// If first run on Android/mobile, enable touch controls by default and force landscape
 			if (Application.isMobilePlatform || SystemInfo.deviceType == DeviceType.Handheld)
 			{
+				Screen.autorotateToPortrait = false;
+				Screen.autorotateToPortraitUpsideDown = false;
+				Screen.autorotateToLandscapeLeft = true;
+				Screen.autorotateToLandscapeRight = true;
+				Screen.orientation = ScreenOrientation.LandscapeLeft;
+
 				if (!PlayerPrefs.HasKey("MobileControls_Enabled"))
 				{
 					PlayerPrefs.SetInt("MobileControls_Enabled", 1);
