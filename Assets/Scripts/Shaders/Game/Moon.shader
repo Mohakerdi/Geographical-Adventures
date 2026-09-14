@@ -19,6 +19,7 @@ Shader "Unlit/Moon"
 			CGPROGRAM
 			#pragma vertex vert
 			#pragma fragment frag
+			#pragma target 3.0
 
 			#include "UnityCG.cginc"
 			#include "Assets/Scripts/Shader Common/GeoMath.hlsl"

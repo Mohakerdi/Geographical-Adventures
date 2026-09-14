@@ -55,15 +55,36 @@ public class SettingsMenu : Menu
 	{
 		applyButton.onClick.AddListener(ApplyCurrentSettings);
 		languageWheel.onValueChanged += OnLanguageChanged;
-		masterVolumeSlider.onValueChanged.AddListener((volume) => UpdateAudioVolume());
-		musicVolumeSlider.onValueChanged.AddListener((volume) => UpdateAudioVolume());
-		sfxVolumeSlider.onValueChanged.AddListener((volume) => UpdateAudioVolume());
-
+		masterVolumeSlider.onValueChanged.AddListener((volume) => {
+			UpdateAudioVolume();
+			lastAppliedSettings.masterVolume = volume;
+			PlayerPrefs.SetFloat("masterVolume", volume);
+			PlayerPrefs.Save();
+		});
+		musicVolumeSlider.onValueChanged.AddListener((volume) => {
+			UpdateAudioVolume();
+			lastAppliedSettings.musicVolume = volume;
+			PlayerPrefs.SetFloat("musicVolume", volume);
+			PlayerPrefs.Save();
+		});
+		sfxVolumeSlider.onValueChanged.AddListener((volume) => {
+			UpdateAudioVolume();
+			lastAppliedSettings.sfxVolume = volume;
+			PlayerPrefs.SetFloat("sfxVolume", volume);
+			PlayerPrefs.Save();
+		});
 	}
 
 	void OnLanguageChanged(int index)
 	{
-		localizationManager.ChangeLanguage(localizationManager.languages[index]);
+		if (localizationManager != null && localizationManager.languages != null && index >= 0 && index < localizationManager.languages.Length)
+		{
+			string langId = localizationManager.languages[index].languageID;
+			localizationManager.ChangeLanguage(localizationManager.languages[index]);
+			lastAppliedSettings.languageID = langId;
+			PlayerPrefs.SetString("languageID", langId);
+			PlayerPrefs.Save();
+		}
 	}
 
 	// Set UI state from loaded settings
@@ -91,16 +112,28 @@ public class SettingsMenu : Menu
 		Settings settings = new Settings();
 		// Graphics
 		settings.isFullscreen = fullscreenToggle.isOn;
-		if (!Application.isEditor)
+		Vector2Int[] resOptions = GetCurrentResolutionOptions();
+		if (!Application.isEditor && resOptions != null && resOptions.Length > 0 && resolutionWheel.activeValueIndex >= 0 && resolutionWheel.activeValueIndex < resOptions.Length)
 		{
-			settings.screenSize = GetCurrentResolutionOptions()[resolutionWheel.activeValueIndex];
+			settings.screenSize = resOptions[resolutionWheel.activeValueIndex];
+		}
+		else
+		{
+			settings.screenSize = new Vector2Int(Screen.width, Screen.height);
 		}
 		settings.vsyncEnabled = vsyncToggle.isOn;
 		settings.terrainQuality = (Settings.TerrainQuality)terrainQuality.activeValueIndex;
 		settings.shadowQuality = (Settings.ShadowQuality)shadowQuality.activeValueIndex;
 
 		// Audio / Language
-		settings.languageID = localizationManager.languages[languageWheel.activeValueIndex].languageID;
+		if (localizationManager != null && localizationManager.languages != null && languageWheel.activeValueIndex >= 0 && languageWheel.activeValueIndex < localizationManager.languages.Length)
+		{
+			settings.languageID = localizationManager.languages[languageWheel.activeValueIndex].languageID;
+		}
+		else
+		{
+			settings.languageID = lastAppliedSettings.languageID;
+		}
 		settings.masterVolume = masterVolumeSlider.value;
 		settings.sfxVolume = sfxVolumeSlider.value;
 		settings.musicVolume = musicVolumeSlider.value;
@@ -111,7 +144,10 @@ public class SettingsMenu : Menu
 	void ApplyCurrentSettings()
 	{
 		Settings currentSettings = GetSettingsFromUI();
-		RebindManager.Instance.SaveAndApplyBindings();
+		if (RebindManager.Instance != null)
+		{
+			RebindManager.Instance.SaveAndApplyBindings();
+		}
 		ApplySettings(currentSettings);
 	}
 
@@ -119,17 +155,22 @@ public class SettingsMenu : Menu
 	void ApplySettings(Settings settings)
 	{
 		// Apply audio / language settings
-		localizationManager.ChangeLanguage(settings.languageID);
+		if (!string.IsNullOrEmpty(settings.languageID) && localizationManager != null)
+		{
+			localizationManager.ChangeLanguage(settings.languageID);
+		}
 		UpdateAudioVolume(settings.masterVolume, settings.musicVolume, settings.sfxVolume);
 
 		// Apply graphics settings
-		FullScreenMode mode = (settings.isFullscreen) ? FullScreenMode.FullScreenWindow : FullScreenMode.Windowed;
-		Screen.SetResolution(settings.screenSize.x, settings.screenSize.y, mode);
-		QualitySettings.vSyncCount = (settings.vsyncEnabled) ? 1 : 0;
+		if (!Application.isMobilePlatform)
+		{
+			FullScreenMode mode = (settings.isFullscreen) ? FullScreenMode.FullScreenWindow : FullScreenMode.Windowed;
+			Screen.SetResolution(settings.screenSize.x, settings.screenSize.y, mode);
+			QualitySettings.vSyncCount = (settings.vsyncEnabled) ? 1 : 0;
+		}
 
 		RenderSettingsController.SetTerrainQuality(settings.terrainQuality);
 		RenderSettingsController.SetShadowQuality(settings.shadowQuality);
-
 
 		// Save
 		lastAppliedSettings = settings;
@@ -203,6 +244,15 @@ public class SettingsMenu : Menu
 			}
 		}
 
+		// Ensure every ratio has at least one resolution (e.g. on mobile devices with non-standard aspect ratios)
+		foreach (Vector2Int supportedRatio in supportedRatios)
+		{
+			if (supportedResolutions[supportedRatio].Count == 0)
+			{
+				supportedResolutions[supportedRatio].Add(new Vector2Int(Screen.width, Screen.height));
+			}
+		}
+
 		// Set up ratio display
 		string[] supportedRatioStrings = new string[supportedRatios.Length];
 		for (int i = 0; i < supportedRatios.Length; i++)
@@ -238,8 +288,17 @@ public class SettingsMenu : Menu
 
 	Vector2Int[] GetCurrentResolutionOptions()
 	{
-		Vector2Int aspectRatio = supportedRatios[aspectRatioWheel.activeValueIndex];
-		return supportedResolutions[aspectRatio].ToArray();
+		if (aspectRatioWheel == null || supportedRatios == null || supportedRatios.Length == 0)
+		{
+			return new Vector2Int[] { new Vector2Int(Screen.width, Screen.height) };
+		}
+		int ratioIndex = Mathf.Clamp(aspectRatioWheel.activeValueIndex, 0, supportedRatios.Length - 1);
+		Vector2Int aspectRatio = supportedRatios[ratioIndex];
+		if (supportedResolutions != null && supportedResolutions.ContainsKey(aspectRatio) && supportedResolutions[aspectRatio].Count > 0)
+		{
+			return supportedResolutions[aspectRatio].ToArray();
+		}
+		return new Vector2Int[] { new Vector2Int(Screen.width, Screen.height) };
 	}
 
 	// Called when the selected aspect ratio changes
@@ -314,18 +373,27 @@ public class SettingsMenu : Menu
 		if (Application.isPlaying)
 		{
 			lastAppliedSettings = Settings.LoadSavedSettings();
-			RebindManager.Instance.OnSettingsOpened();
+			if (RebindManager.Instance != null)
+			{
+				RebindManager.Instance.OnSettingsOpened();
+			}
 			SetUIFromSettings(lastAppliedSettings);
 		}
 	}
 
 	protected override void OnMenuClosed()
 	{
-
 		if (Application.isPlaying)
 		{
-			//RebindManager.Instance.close();
-			ApplySettings(lastAppliedSettings);
+			// On mobile, auto-apply current UI selections when closing so users don't lose changes
+			if (Application.isMobilePlatform)
+			{
+				ApplyCurrentSettings();
+			}
+			else
+			{
+				ApplySettings(lastAppliedSettings);
+			}
 		}
 	}
 

@@ -20,6 +20,7 @@ Shader "Custom/Globe"
 			CGPROGRAM
 			#pragma vertex vert
 			#pragma fragment frag
+			#pragma target 3.0
 			#pragma multi_compile_fwdbase
 
 			#include "UnityCG.cginc"

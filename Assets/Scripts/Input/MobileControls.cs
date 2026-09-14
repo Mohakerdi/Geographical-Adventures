@@ -249,6 +249,7 @@ namespace GeoGame.InputMobile
 			RectTransform joyZoneRect = joyZone.GetComponent<RectTransform>();
 			joyZoneRect.anchorMin = new Vector2(0, 0);
 			joyZoneRect.anchorMax = new Vector2(0.45f, 0.7f);
+			joyZoneRect.pivot = new Vector2(0, 0);
 			joyZoneRect.offsetMin = Vector2.zero;
 			joyZoneRect.offsetMax = Vector2.zero;
 			Image joyZoneImg = joyZone.GetComponent<Image>();
@@ -260,13 +261,15 @@ namespace GeoGame.InputMobile
 			joystickBaseRect = joyBase.GetComponent<RectTransform>();
 			joystickBaseRect.anchorMin = new Vector2(0, 0);
 			joystickBaseRect.anchorMax = new Vector2(0, 0);
-			joystickBaseRect.anchoredPosition = new Vector2(180, 180);
+			joystickBaseRect.pivot = new Vector2(0.5f, 0.5f);
+			joystickBasePos = new Vector2(180, 180);
+			joystickBaseRect.anchoredPosition = joystickBasePos;
 			joystickBaseRect.sizeDelta = new Vector2(joystickRadius * 2, joystickRadius * 2);
-			joystickBasePos = joystickBaseRect.anchoredPosition;
 
 			Image baseImg = joyBase.GetComponent<Image>();
 			baseImg.sprite = circleSprite;
 			baseImg.color = new Color(0.1f, 0.15f, 0.2f, 0.5f);
+			baseImg.raycastTarget = false;
 
 			// Outer ring decoration
 			GameObject joyRing = new GameObject("JoystickRing", typeof(RectTransform), typeof(Image));
@@ -279,6 +282,7 @@ namespace GeoGame.InputMobile
 			Image ringImg = joyRing.GetComponent<Image>();
 			ringImg.sprite = circleHollowSprite;
 			ringImg.color = new Color(1f, 1f, 1f, 0.35f);
+			ringImg.raycastTarget = false;
 
 			// Joystick Knob
 			GameObject joyKnob = new GameObject("JoystickKnob", typeof(RectTransform), typeof(Image));
@@ -289,21 +293,31 @@ namespace GeoGame.InputMobile
 			Image knobImg = joyKnob.GetComponent<Image>();
 			knobImg.sprite = circleSprite;
 			knobImg.color = new Color(1f, 1f, 1f, 0.85f);
+			knobImg.raycastTarget = false;
 
 			// Joystick touch handler
 			TouchTrigger joyTrigger = joyZone.AddComponent<TouchTrigger>();
 			joyTrigger.onPointerDown = (ped) =>
 			{
 				joystickPointerId = ped.pointerId;
-				RectTransformUtility.ScreenPointToLocalPointInRectangle(joyZoneRect, ped.position, ped.pressEventCamera, out Vector2 localPos);
-				joystickBaseRect.anchoredPosition = localPos;
-				UpdateJoystick(ped.position, ped.pressEventCamera);
+				// In ScreenSpaceOverlay canvas, Camera MUST be null for ScreenPointToLocalPointInRectangle
+				if (RectTransformUtility.ScreenPointToLocalPointInRectangle(joyZoneRect, ped.position, null, out Vector2 localPos))
+				{
+					float minX = joystickRadius;
+					float maxX = Mathf.Max(minX, joyZoneRect.rect.width - joystickRadius);
+					float minY = joystickRadius;
+					float maxY = Mathf.Max(minY, joyZoneRect.rect.height - joystickRadius);
+					localPos.x = Mathf.Clamp(localPos.x, minX, maxX);
+					localPos.y = Mathf.Clamp(localPos.y, minY, maxY);
+					joystickBaseRect.anchoredPosition = localPos;
+				}
+				UpdateJoystick(ped.position);
 			};
 			joyTrigger.onDrag = (ped) =>
 			{
 				if (ped.pointerId == joystickPointerId)
 				{
-					UpdateJoystick(ped.position, ped.pressEventCamera);
+					UpdateJoystick(ped.position);
 				}
 			};
 			joyTrigger.onPointerUp = (ped) =>
@@ -385,9 +399,9 @@ namespace GeoGame.InputMobile
 				anchorMin: new Vector2(0.5f, 1), anchorMax: new Vector2(0.5f, 1));
 		}
 
-		private void UpdateJoystick(Vector2 screenPos, Camera cam)
+		private void UpdateJoystick(Vector2 screenPos)
 		{
-			RectTransformUtility.ScreenPointToLocalPointInRectangle(joystickBaseRect, screenPos, cam, out Vector2 localPoint);
+			RectTransformUtility.ScreenPointToLocalPointInRectangle(joystickBaseRect, screenPos, null, out Vector2 localPoint);
 			float dst = localPoint.magnitude;
 			Vector2 dir = dst > 0.001f ? localPoint / dst : Vector2.zero;
 
