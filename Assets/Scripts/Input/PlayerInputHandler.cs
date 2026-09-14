@@ -41,10 +41,32 @@ public class PlayerInputHandler : MonoBehaviour
 		Vector2 movementInput = playerActions.PlayerControls.Movement.ReadValue<Vector2>();
 		float accelerateDir = playerActions.PlayerControls.Speed.ReadValue<float>();
 		bool boosting = playerActions.PlayerControls.Boost.IsPressed();
+		bool dropPackage = playerActions.PlayerControls.DropPackage.WasPressedThisFrame();
+
+		if (GeoGame.InputMobile.MobileControls.Instance != null && GeoGame.InputMobile.MobileControls.Instance.IsActive)
+		{
+			var mobile = GeoGame.InputMobile.MobileControls.Instance;
+			if (mobile.MovementInput.sqrMagnitude > 0.001f)
+			{
+				movementInput = mobile.MovementInput;
+			}
+			if (Mathf.Abs(mobile.SpeedInput) > 0.001f)
+			{
+				accelerateDir = mobile.SpeedInput;
+			}
+			if (mobile.IsBoosting)
+			{
+				boosting = true;
+			}
+			if (mobile.ConsumeDropPackage())
+			{
+				dropPackage = true;
+			}
+		}
+
 		player.UpdateMovementInput(movementInput, accelerateDir, boosting);
 
-
-		if (playerActions.PlayerControls.DropPackage.WasPressedThisFrame())
+		if (dropPackage)
 		{
 			questSystem.TryDropPackage();
 		}
@@ -64,15 +86,29 @@ public class PlayerInputHandler : MonoBehaviour
 
 	void CameraControls()
 	{
-		if (playerActions.CameraControls.ForwardCameraView.WasPressedThisFrame())
+		bool forward = playerActions.CameraControls.ForwardCameraView.WasPressedThisFrame();
+		bool backward = playerActions.CameraControls.BackwardCameraView.WasPressedThisFrame();
+		bool top = playerActions.CameraControls.TopCameraView.WasPressedThisFrame();
+		bool cycle = GeoGame.InputMobile.MobileControls.Instance != null && GeoGame.InputMobile.MobileControls.Instance.ConsumeCycleCamera();
+
+		if (cycle)
+		{
+			if (gameCamera.activeView == GameCamera.ViewMode.LookingForward)
+				gameCamera.SetActiveView(GameCamera.ViewMode.LookingBehind);
+			else if (gameCamera.activeView == GameCamera.ViewMode.LookingBehind)
+				gameCamera.SetActiveView(GameCamera.ViewMode.TopDown);
+			else
+				gameCamera.SetActiveView(GameCamera.ViewMode.LookingForward);
+		}
+		else if (forward)
 		{
 			gameCamera.SetActiveView(GameCamera.ViewMode.LookingForward);
 		}
-		if (playerActions.CameraControls.BackwardCameraView.WasPressedThisFrame())
+		else if (backward)
 		{
 			gameCamera.SetActiveView(GameCamera.ViewMode.LookingBehind);
 		}
-		if (playerActions.CameraControls.TopCameraView.WasPressedThisFrame())
+		else if (top)
 		{
 			gameCamera.SetActiveView(GameCamera.ViewMode.TopDown);
 		}
@@ -80,12 +116,21 @@ public class PlayerInputHandler : MonoBehaviour
 
 	void UIControls()
 	{
-		if (playerActions.UIControls.TogglePause.WasPressedThisFrame())
+		bool pause = playerActions.UIControls.TogglePause.WasPressedThisFrame();
+		bool map = playerActions.UIControls.ToggleMap.WasPressedThisFrame();
+
+		if (GeoGame.InputMobile.MobileControls.Instance != null)
+		{
+			if (GeoGame.InputMobile.MobileControls.Instance.ConsumeTogglePause()) pause = true;
+			if (GeoGame.InputMobile.MobileControls.Instance.ConsumeToggleMap()) map = true;
+		}
+
+		if (pause)
 		{
 			uIManager.TogglePause();
 		}
 
-		if (playerActions.UIControls.ToggleMap.WasPressedThisFrame())
+		if (map)
 		{
 			uIManager.ToggleMap();
 		}

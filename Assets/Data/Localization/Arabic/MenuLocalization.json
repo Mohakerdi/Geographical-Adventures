@@ -1,0 +1,180 @@
+{
+    "entries": [
+        {
+            "id": "mainMenu.subtitle",
+            "text": "(قيد التطوير)"
+        },
+        {
+            "id": "mainMenu.playButton",
+            "text": "ابدأ اللعب"
+        },
+        {
+            "id": "mainMenu.manualButton",
+            "text": "دليل اللعبة"
+        },
+        {
+            "id": "mainMenu.settingsButton",
+            "text": "الإعدادات"
+        },
+        {
+            "id": "mainMenu.creditsButton",
+            "text": "فريق العمل"
+        },
+        {
+            "id": "mainMenu.quitButton",
+            "text": "خروج"
+        },
+        {
+            "id": "subMenu.closeButton",
+            "text": "إغلاق"
+        },
+        {
+            "id": "settingsMenu.graphicsTab",
+            "text": "الرسومات"
+        },
+        {
+            "id": "settingsMenu.audioAndLanguageTab",
+            "text": "الصوت واللغة"
+        },
+        {
+            "id": "settingsMenu.controlsTab",
+            "text": "التحكم"
+        },
+        {
+            "id": "settingsMenu.graphics.aspectRatio",
+            "text": "نسبة العرض"
+        },
+        {
+            "id": "settingsMenu.graphics.resolution",
+            "text": "الدقة"
+        },
+        {
+            "id": "settingsMenu.graphics.fullScreen",
+            "text": "ملء الشاشة"
+        },
+        {
+            "id": "settingsMenu.graphics.vSync",
+            "text": "المزامنة الرأسية"
+        },
+        {
+            "id": "settingsMenu.graphics.terrainQuality",
+            "text": "جودة التضاريس"
+        },
+        {
+            "id": "settingsMenu.graphics.shadowQuality",
+            "text": "جودة الظلال"
+        },
+        {
+            "id": "settingsMenu.audioAndLanguage.language",
+            "text": "اللغة"
+        },
+        {
+            "id": "settingsMenu.audioAndLanguage.translationNote",
+            "text": "يرجى ملاحظة أن هذه الترجمات هي جهد مجتمعي قيد التطوير المستمر."
+        },
+        {
+            "id": "settingsMenu.audioAndLanguage.masterVolume",
+            "text": "الصوت العام"
+        },
+        {
+            "id": "settingsMenu.audioAndLanguage.musicVolume",
+            "text": "صوت الموسيقى"
+        },
+        {
+            "id": "settingsMenu.audioAndLanguage.sfxVolume",
+            "text": "المؤثرات الصوتية"
+        },
+        {
+            "id": "settingsMenu.controls.resetButton",
+            "text": "إعادة ضبط"
+        },
+        {
+            "id": "settingsMenu.controls.playerControls",
+            "text": "تحكم اللاعب"
+        },
+        {
+            "id": "settingsMenu.controls.turn",
+            "text": "الانعطاف"
+        },
+        {
+            "id": "settingsMenu.controls.elevation",
+            "text": "الارتفاع"
+        },
+        {
+            "id": "settingsMenu.controls.speed",
+            "text": "السرعة"
+        },
+        {
+            "id": "settingsMenu.controls.boost",
+            "text": "التعزيز"
+        },
+        {
+            "id": "settingsMenu.controls.dropPackage",
+            "text": "إسقاط الطرد"
+        },
+        {
+            "id": "settingsMenu.controls.cameraControls",
+            "text": "تحكم الكاميرا"
+        },
+        {
+            "id": "settingsMenu.controls.forwardView",
+            "text": "رؤية أمامية"
+        },
+        {
+            "id": "settingsMenu.controls.behindView",
+            "text": "رؤية خلفية"
+        },
+        {
+            "id": "settingsMenu.controls.topView",
+            "text": "رؤية علوية"
+        },
+        {
+            "id": "settingsMenu.controls.extraControls",
+            "text": "تحكم إضافي"
+        },
+        {
+            "id": "settingsMenu.controls.makeDayTime",
+            "text": "تحويل إلى النهار"
+        },
+        {
+            "id": "settingsMenu.controls.makeNightTime",
+            "text": "تحويل إلى الليل"
+        },
+        {
+            "id": "settingsMenu.controls.uiControls",
+            "text": "واجهة المستخدم"
+        },
+        {
+            "id": "settingsMenu.controls.toggleMap",
+            "text": "الخريطة"
+        },
+        {
+            "id": "settingsMenu.controls.togglePause",
+            "text": "إيقاف مؤقت"
+        },
+        {
+            "id": "settingsMenu.applyButton",
+            "text": "تطبيق"
+        },
+        {
+            "id": "settingsMenu.exitNote",
+            "text": "ملاحظة: الإغلاق دون تطبيق سيتجاهل التغييرات."
+        },
+        {
+            "id": "pauseMenu.pausedTitle",
+            "text": "متوقف مؤقتاً"
+        },
+        {
+            "id": "pauseMenu.resumeButton",
+            "text": "استئناف"
+        },
+        {
+            "id": "pauseMenu.statsButton",
+            "text": "الإحصائيات"
+        },
+        {
+            "id": "pauseMenu.quitButton",
+            "text": "خروج"
+        }
+    ]
+}

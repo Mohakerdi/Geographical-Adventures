@@ -98,7 +98,12 @@ namespace GeoGame.Localization
 				lookup = Instance.languageLookup[Instance.activeLanguage];
 				if (lookup.ContainsKey(id))
 				{
-					return lookup[id];
+					string text = lookup[id];
+					if (Instance.activeLanguage.rightToLeftWritingSystem)
+					{
+						text = Arabic.ArabicFixer.Fix(text);
+					}
+					return text;
 				}
 			}
 
@@ -107,7 +112,12 @@ namespace GeoGame.Localization
 
 			if (lookup.ContainsKey(id))
 			{
-				return lookup[id];
+				string text = lookup[id];
+				if (Instance.defaultLanguage.rightToLeftWritingSystem)
+				{
+					text = Arabic.ArabicFixer.Fix(text);
+				}
+				return text;
 			}
 			// No entry found
 			string missing = $"Missing entry: {id}";

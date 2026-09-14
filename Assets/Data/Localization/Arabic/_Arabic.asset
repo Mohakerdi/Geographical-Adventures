@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6c11dd3d25848ea45b8432cae9e718ce, type: 3}
+  m_Name: _Arabic
+  m_EditorClassIdentifier: 
+  languageDisplayName: العربية
+  languageID: arabic
+  rightToLeftWritingSystem: 1
+  localizedStringGroups:
+  - {fileID: 4900000, guid: 74d95f6a534e40da9341e9f25c9edefa, type: 3}
+  - {fileID: 4900000, guid: b491f4b234c948ceb1cf999af9d1ffe7, type: 3}
+  localizedTextChunks:
+  - id: mainMenu.manualText
+    file: {fileID: 4900000, guid: 6ed5092db03b4c978e3f2f3a98ccd031, type: 3}

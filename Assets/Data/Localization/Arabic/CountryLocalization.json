@@ -1,0 +1,968 @@
+{
+    "entries": [
+        {
+            "id": "countryCode3.ATC",
+            "text": "جزر أشمور وكارتييه"
+        },
+        {
+            "id": "countryCode3.AFG",
+            "text": "أفغانستان"
+        },
+        {
+            "id": "countryCode3.ALD",
+            "text": "جزر أولاند"
+        },
+        {
+            "id": "countryCode3.ALB",
+            "text": "ألبانيا"
+        },
+        {
+            "id": "countryCode3.DZA",
+            "text": "الجزائر"
+        },
+        {
+            "id": "countryCode3.ASM",
+            "text": "ساموا الأمريكية"
+        },
+        {
+            "id": "countryCode3.AND",
+            "text": "أندورا"
+        },
+        {
+            "id": "countryCode3.AGO",
+            "text": "أنغولا"
+        },
+        {
+            "id": "countryCode3.AIA",
+            "text": "أنغويلا"
+        },
+        {
+            "id": "countryCode3.ATA",
+            "text": "أنتاركتيكا"
+        },
+        {
+            "id": "countryCode3.ATG",
+            "text": "أنتيغوا وبربودا"
+        },
+        {
+            "id": "countryCode3.ARG",
+            "text": "الأرجنتين"
+        },
+        {
+            "id": "countryCode3.ARM",
+            "text": "أرمينيا"
+        },
+        {
+            "id": "countryCode3.ABW",
+            "text": "أروبا"
+        },
+        {
+            "id": "countryCode3.AUS",
+            "text": "أستراليا"
+        },
+        {
+            "id": "countryCode3.AUT",
+            "text": "النمسا"
+        },
+        {
+            "id": "countryCode3.AZE",
+            "text": "أذربيجان"
+        },
+        {
+            "id": "countryCode3.BHS",
+            "text": "جزر البهاما"
+        },
+        {
+            "id": "countryCode3.BHR",
+            "text": "البحرين"
+        },
+        {
+            "id": "countryCode3.BGD",
+            "text": "بنغلاديش"
+        },
+        {
+            "id": "countryCode3.BRB",
+            "text": "بربادوس"
+        },
+        {
+            "id": "countryCode3.BLR",
+            "text": "بيلاروس"
+        },
+        {
+            "id": "countryCode3.BEL",
+            "text": "بلجيكا"
+        },
+        {
+            "id": "countryCode3.BLZ",
+            "text": "بليز"
+        },
+        {
+            "id": "countryCode3.BEN",
+            "text": "بنين"
+        },
+        {
+            "id": "countryCode3.BMU",
+            "text": "برمودا"
+        },
+        {
+            "id": "countryCode3.BTN",
+            "text": "بوتان"
+        },
+        {
+            "id": "countryCode3.BOL",
+            "text": "بوليفيا"
+        },
+        {
+            "id": "countryCode3.BIH",
+            "text": "البوسنة والهرسك"
+        },
+        {
+            "id": "countryCode3.BWA",
+            "text": "بوتسوانا"
+        },
+        {
+            "id": "countryCode3.BRA",
+            "text": "البرازيل"
+        },
+        {
+            "id": "countryCode3.VGB",
+            "text": "جزر فيرجن البريطانية"
+        },
+        {
+            "id": "countryCode3.BRN",
+            "text": "بروناي"
+        },
+        {
+            "id": "countryCode3.BGR",
+            "text": "بلغاريا"
+        },
+        {
+            "id": "countryCode3.BFA",
+            "text": "بوركينا فاسو"
+        },
+        {
+            "id": "countryCode3.BDI",
+            "text": "بوروندي"
+        },
+        {
+            "id": "countryCode3.CAF",
+            "text": "جمهورية أفريقيا الوسطى"
+        },
+        {
+            "id": "countryCode3.CPV",
+            "text": "الرأس الأخضر"
+        },
+        {
+            "id": "countryCode3.KHM",
+            "text": "كمبوديا"
+        },
+        {
+            "id": "countryCode3.CMR",
+            "text": "الكاميرون"
+        },
+        {
+            "id": "countryCode3.CAN",
+            "text": "كندا"
+        },
+        {
+            "id": "countryCode3.CYM",
+            "text": "جزر كايمان"
+        },
+        {
+            "id": "countryCode3.TCD",
+            "text": "تشاد"
+        },
+        {
+            "id": "countryCode3.CHL",
+            "text": "تشيلي"
+        },
+        {
+            "id": "countryCode3.CHN",
+            "text": "الصين"
+        },
+        {
+            "id": "countryCode3.COL",
+            "text": "كولومبيا"
+        },
+        {
+            "id": "countryCode3.COM",
+            "text": "جزر القمر"
+        },
+        {
+            "id": "countryCode3.COG",
+            "text": "الكونغو - برازافيل"
+        },
+        {
+            "id": "countryCode3.COK",
+            "text": "جزر كوك"
+        },
+        {
+            "id": "countryCode3.CRI",
+            "text": "كوستاريكا"
+        },
+        {
+            "id": "countryCode3.CIV",
+            "text": "ساحل العاج"
+        },
+        {
+            "id": "countryCode3.HRV",
+            "text": "كرواتيا"
+        },
+        {
+            "id": "countryCode3.CUB",
+            "text": "كوبا"
+        },
+        {
+            "id": "countryCode3.CUW",
+            "text": "كوراساو"
+        },
+        {
+            "id": "countryCode3.CYP",
+            "text": "قبرص"
+        },
+        {
+            "id": "countryCode3.CZE",
+            "text": "التشيك"
+        },
+        {
+            "id": "countryCode3.COD",
+            "text": "الكونغو - كينشاسا"
+        },
+        {
+            "id": "countryCode3.DNK",
+            "text": "الدانمرك"
+        },
+        {
+            "id": "countryCode3.DJI",
+            "text": "جيبوتي"
+        },
+        {
+            "id": "countryCode3.DMA",
+            "text": "دومينيكا"
+        },
+        {
+            "id": "countryCode3.DOM",
+            "text": "جمهورية الدومينيكان"
+        },
+        {
+            "id": "countryCode3.ECU",
+            "text": "الإكوادور"
+        },
+        {
+            "id": "countryCode3.EGY",
+            "text": "مصر"
+        },
+        {
+            "id": "countryCode3.SLV",
+            "text": "السلفادور"
+        },
+        {
+            "id": "countryCode3.GNQ",
+            "text": "غينيا الاستوائية"
+        },
+        {
+            "id": "countryCode3.ERI",
+            "text": "إريتريا"
+        },
+        {
+            "id": "countryCode3.EST",
+            "text": "إستونيا"
+        },
+        {
+            "id": "countryCode3.SWZ",
+            "text": "إسواتيني"
+        },
+        {
+            "id": "countryCode3.ETH",
+            "text": "إثيوبيا"
+        },
+        {
+            "id": "countryCode3.FRO",
+            "text": "جزر فارو"
+        },
+        {
+            "id": "countryCode3.FLK",
+            "text": "جزر فوكلاند"
+        },
+        {
+            "id": "countryCode3.FJI",
+            "text": "فيجي"
+        },
+        {
+            "id": "countryCode3.FIN",
+            "text": "فنلندا"
+        },
+        {
+            "id": "countryCode3.ATF",
+            "text": "الأقاليم الجنوبية الفرنسية"
+        },
+        {
+            "id": "countryCode3.FRA",
+            "text": "فرنسا"
+        },
+        {
+            "id": "countryCode3.PYF",
+            "text": "بولينيزيا الفرنسية"
+        },
+        {
+            "id": "countryCode3.GAB",
+            "text": "الغابون"
+        },
+        {
+            "id": "countryCode3.GMB",
+            "text": "غامبيا"
+        },
+        {
+            "id": "countryCode3.GEO",
+            "text": "جورجيا"
+        },
+        {
+            "id": "countryCode3.DEU",
+            "text": "ألمانيا"
+        },
+        {
+            "id": "countryCode3.GHA",
+            "text": "غانا"
+        },
+        {
+            "id": "countryCode3.GRC",
+            "text": "اليونان"
+        },
+        {
+            "id": "countryCode3.GRL",
+            "text": "غرينلاند"
+        },
+        {
+            "id": "countryCode3.GRD",
+            "text": "غرينادا"
+        },
+        {
+            "id": "countryCode3.GUM",
+            "text": "غوام"
+        },
+        {
+            "id": "countryCode3.GTM",
+            "text": "غواتيمالا"
+        },
+        {
+            "id": "countryCode3.GGY",
+            "text": "غيرنزي"
+        },
+        {
+            "id": "countryCode3.GIN",
+            "text": "غينيا"
+        },
+        {
+            "id": "countryCode3.GNB",
+            "text": "غينيا بيساو"
+        },
+        {
+            "id": "countryCode3.GUY",
+            "text": "غيانا"
+        },
+        {
+            "id": "countryCode3.HMD",
+            "text": "جزيرة هيرد وجزر ماكدونالد"
+        },
+        {
+            "id": "countryCode3.HTI",
+            "text": "هايتي"
+        },
+        {
+            "id": "countryCode3.HND",
+            "text": "هندوراس"
+        },
+        {
+            "id": "countryCode3.HKG",
+            "text": "هونغ كونغ الصينية (منطقة إدارية خاصة)"
+        },
+        {
+            "id": "countryCode3.HUN",
+            "text": "هنغاريا"
+        },
+        {
+            "id": "countryCode3.IOT",
+            "text": "الإقليم البريطاني في المحيط الهندي"
+        },
+        {
+            "id": "countryCode3.ISL",
+            "text": "آيسلندا"
+        },
+        {
+            "id": "countryCode3.IND",
+            "text": "الهند"
+        },
+        {
+            "id": "countryCode3.IOA",
+            "text": "أقاليم المحيط الهندي"
+        },
+        {
+            "id": "countryCode3.IDN",
+            "text": "إندونيسيا"
+        },
+        {
+            "id": "countryCode3.IRN",
+            "text": "إيران"
+        },
+        {
+            "id": "countryCode3.IRQ",
+            "text": "العراق"
+        },
+        {
+            "id": "countryCode3.IRL",
+            "text": "أيرلندا"
+        },
+        {
+            "id": "countryCode3.IMN",
+            "text": "جزيرة مان"
+        },
+        {
+            "id": "countryCode3.ISR",
+            "text": "إسرائيل"
+        },
+        {
+            "id": "countryCode3.ITA",
+            "text": "إيطاليا"
+        },
+        {
+            "id": "countryCode3.JAM",
+            "text": "جامايكا"
+        },
+        {
+            "id": "countryCode3.JPN",
+            "text": "اليابان"
+        },
+        {
+            "id": "countryCode3.JEY",
+            "text": "جيرسي"
+        },
+        {
+            "id": "countryCode3.JOR",
+            "text": "الأردن"
+        },
+        {
+            "id": "countryCode3.KAS",
+            "text": "كشمير"
+        },
+        {
+            "id": "countryCode3.KAZ",
+            "text": "كازاخستان"
+        },
+        {
+            "id": "countryCode3.KEN",
+            "text": "كينيا"
+        },
+        {
+            "id": "countryCode3.KIR",
+            "text": "كيريباتي"
+        },
+        {
+            "id": "countryCode3.KOS",
+            "text": "كوسوفو"
+        },
+        {
+            "id": "countryCode3.KWT",
+            "text": "الكويت"
+        },
+        {
+            "id": "countryCode3.KGZ",
+            "text": "قيرغيزستان"
+        },
+        {
+            "id": "countryCode3.LAO",
+            "text": "لاوس"
+        },
+        {
+            "id": "countryCode3.LVA",
+            "text": "لاتفيا"
+        },
+        {
+            "id": "countryCode3.LBN",
+            "text": "لبنان"
+        },
+        {
+            "id": "countryCode3.LSO",
+            "text": "ليسوتو"
+        },
+        {
+            "id": "countryCode3.LBR",
+            "text": "ليبيريا"
+        },
+        {
+            "id": "countryCode3.LBY",
+            "text": "ليبيا"
+        },
+        {
+            "id": "countryCode3.LIE",
+            "text": "ليختنشتاين"
+        },
+        {
+            "id": "countryCode3.LTU",
+            "text": "ليتوانيا"
+        },
+        {
+            "id": "countryCode3.LUX",
+            "text": "لوكسمبورغ"
+        },
+        {
+            "id": "countryCode3.MAC",
+            "text": "منطقة ماكاو الإدارية الخاصة"
+        },
+        {
+            "id": "countryCode3.MKD",
+            "text": "مقدونيا الشمالية"
+        },
+        {
+            "id": "countryCode3.MDG",
+            "text": "مدغشقر"
+        },
+        {
+            "id": "countryCode3.MWI",
+            "text": "ملاوي"
+        },
+        {
+            "id": "countryCode3.MYS",
+            "text": "ماليزيا"
+        },
+        {
+            "id": "countryCode3.MDV",
+            "text": "جزر المالديف"
+        },
+        {
+            "id": "countryCode3.MLI",
+            "text": "مالي"
+        },
+        {
+            "id": "countryCode3.MLT",
+            "text": "مالطا"
+        },
+        {
+            "id": "countryCode3.MHL",
+            "text": "جزر مارشال"
+        },
+        {
+            "id": "countryCode3.MRT",
+            "text": "موريتانيا"
+        },
+        {
+            "id": "countryCode3.MUS",
+            "text": "موريشيوس"
+        },
+        {
+            "id": "countryCode3.MEX",
+            "text": "المكسيك"
+        },
+        {
+            "id": "countryCode3.FSM",
+            "text": "ميكرونيزيا"
+        },
+        {
+            "id": "countryCode3.MDA",
+            "text": "مولدوفا"
+        },
+        {
+            "id": "countryCode3.MCO",
+            "text": "موناكو"
+        },
+        {
+            "id": "countryCode3.MNG",
+            "text": "منغوليا"
+        },
+        {
+            "id": "countryCode3.MNE",
+            "text": "الجبل الأسود"
+        },
+        {
+            "id": "countryCode3.MSR",
+            "text": "مونتسرات"
+        },
+        {
+            "id": "countryCode3.MAR",
+            "text": "المغرب"
+        },
+        {
+            "id": "countryCode3.MOZ",
+            "text": "موزمبيق"
+        },
+        {
+            "id": "countryCode3.MMR",
+            "text": "ميانمار (بورما)"
+        },
+        {
+            "id": "countryCode3.MNP",
+            "text": "جزر ماريانا الشمالية"
+        },
+        {
+            "id": "countryCode3.NAM",
+            "text": "ناميبيا"
+        },
+        {
+            "id": "countryCode3.NRU",
+            "text": "ناورو"
+        },
+        {
+            "id": "countryCode3.NPL",
+            "text": "نيبال"
+        },
+        {
+            "id": "countryCode3.NLD",
+            "text": "هولندا"
+        },
+        {
+            "id": "countryCode3.NCL",
+            "text": "كاليدونيا الجديدة"
+        },
+        {
+            "id": "countryCode3.NZL",
+            "text": "نيوزيلندا"
+        },
+        {
+            "id": "countryCode3.NIC",
+            "text": "نيكاراغوا"
+        },
+        {
+            "id": "countryCode3.NER",
+            "text": "النيجر"
+        },
+        {
+            "id": "countryCode3.NGA",
+            "text": "نيجيريا"
+        },
+        {
+            "id": "countryCode3.NIU",
+            "text": "نيوي"
+        },
+        {
+            "id": "countryCode3.NFK",
+            "text": "جزيرة نورفولك"
+        },
+        {
+            "id": "countryCode3.PRK",
+            "text": "كوريا الشمالية"
+        },
+        {
+            "id": "countryCode3.CYN",
+            "text": "قبرص الشمالية"
+        },
+        {
+            "id": "countryCode3.NOR",
+            "text": "النرويج"
+        },
+        {
+            "id": "countryCode3.OMN",
+            "text": "عُمان"
+        },
+        {
+            "id": "countryCode3.PAK",
+            "text": "باكستان"
+        },
+        {
+            "id": "countryCode3.PLW",
+            "text": "بالاو"
+        },
+        {
+            "id": "countryCode3.PSX",
+            "text": "فلسطين"
+        },
+        {
+            "id": "countryCode3.PAN",
+            "text": "بنما"
+        },
+        {
+            "id": "countryCode3.PNG",
+            "text": "بابوا غينيا الجديدة"
+        },
+        {
+            "id": "countryCode3.PRY",
+            "text": "باراغواي"
+        },
+        {
+            "id": "countryCode3.PER",
+            "text": "بيرو"
+        },
+        {
+            "id": "countryCode3.PHL",
+            "text": "الفلبين"
+        },
+        {
+            "id": "countryCode3.PCN",
+            "text": "جزر بيتكيرن"
+        },
+        {
+            "id": "countryCode3.POL",
+            "text": "بولندا"
+        },
+        {
+            "id": "countryCode3.PRT",
+            "text": "البرتغال"
+        },
+        {
+            "id": "countryCode3.PRI",
+            "text": "بورتوريكو"
+        },
+        {
+            "id": "countryCode3.QAT",
+            "text": "قطر"
+        },
+        {
+            "id": "countryCode3.ROU",
+            "text": "رومانيا"
+        },
+        {
+            "id": "countryCode3.RUS",
+            "text": "روسيا"
+        },
+        {
+            "id": "countryCode3.RWA",
+            "text": "رواندا"
+        },
+        {
+            "id": "countryCode3.SGS",
+            "text": "جورجيا الجنوبية وجزر ساندويتش الجنوبية"
+        },
+        {
+            "id": "countryCode3.STP",
+            "text": "ساو تومي وبرينسيبي"
+        },
+        {
+            "id": "countryCode3.SHN",
+            "text": "سانت هيلينا"
+        },
+        {
+            "id": "countryCode3.LCA",
+            "text": "سانت لوسيا"
+        },
+        {
+            "id": "countryCode3.WSM",
+            "text": "ساموا"
+        },
+        {
+            "id": "countryCode3.SMR",
+            "text": "سان مارينو"
+        },
+        {
+            "id": "countryCode3.SAU",
+            "text": "المملكة العربية السعودية"
+        },
+        {
+            "id": "countryCode3.SEN",
+            "text": "السنغال"
+        },
+        {
+            "id": "countryCode3.SRB",
+            "text": "صربيا"
+        },
+        {
+            "id": "countryCode3.SYC",
+            "text": "سيشل"
+        },
+        {
+            "id": "countryCode3.SLE",
+            "text": "سيراليون"
+        },
+        {
+            "id": "countryCode3.SGP",
+            "text": "سنغافورة"
+        },
+        {
+            "id": "countryCode3.SXM",
+            "text": "سانت مارتن"
+        },
+        {
+            "id": "countryCode3.SVK",
+            "text": "سلوفاكيا"
+        },
+        {
+            "id": "countryCode3.SVN",
+            "text": "سلوفينيا"
+        },
+        {
+            "id": "countryCode3.SLB",
+            "text": "جزر سليمان"
+        },
+        {
+            "id": "countryCode3.SOM",
+            "text": "الصومال"
+        },
+        {
+            "id": "countryCode3.SOL",
+            "text": "صوماليلاند"
+        },
+        {
+            "id": "countryCode3.ZAF",
+            "text": "جنوب أفريقيا"
+        },
+        {
+            "id": "countryCode3.KOR",
+            "text": "كوريا الجنوبية"
+        },
+        {
+            "id": "countryCode3.SSD",
+            "text": "جنوب السودان"
+        },
+        {
+            "id": "countryCode3.ESP",
+            "text": "إسبانيا"
+        },
+        {
+            "id": "countryCode3.LKA",
+            "text": "سريلانكا"
+        },
+        {
+            "id": "countryCode3.SPM",
+            "text": "سان بيير ومكويلون"
+        },
+        {
+            "id": "countryCode3.VCT",
+            "text": "سانت فنسنت وجزر غرينادين"
+        },
+        {
+            "id": "countryCode3.KNA",
+            "text": "سانت كيتس ونيفيس"
+        },
+        {
+            "id": "countryCode3.BLM",
+            "text": "سان بارتليمي"
+        },
+        {
+            "id": "countryCode3.MAF",
+            "text": "سان مارتن"
+        },
+        {
+            "id": "countryCode3.SDN",
+            "text": "السودان"
+        },
+        {
+            "id": "countryCode3.SUR",
+            "text": "سورينام"
+        },
+        {
+            "id": "countryCode3.SWE",
+            "text": "السويد"
+        },
+        {
+            "id": "countryCode3.CHE",
+            "text": "سويسرا"
+        },
+        {
+            "id": "countryCode3.SYR",
+            "text": "سوريا"
+        },
+        {
+            "id": "countryCode3.TCA",
+            "text": "جزر توركس وكايكوس"
+        },
+        {
+            "id": "countryCode3.TWN",
+            "text": "تايوان"
+        },
+        {
+            "id": "countryCode3.TJK",
+            "text": "طاجيكستان"
+        },
+        {
+            "id": "countryCode3.TZA",
+            "text": "تنزانيا"
+        },
+        {
+            "id": "countryCode3.THA",
+            "text": "تايلاند"
+        },
+        {
+            "id": "countryCode3.TLS",
+            "text": "تيمور - ليشتي"
+        },
+        {
+            "id": "countryCode3.TGO",
+            "text": "توغو"
+        },
+        {
+            "id": "countryCode3.TON",
+            "text": "تونغا"
+        },
+        {
+            "id": "countryCode3.TTO",
+            "text": "ترينيداد وتوباغو"
+        },
+        {
+            "id": "countryCode3.TUN",
+            "text": "تونس"
+        },
+        {
+            "id": "countryCode3.TUR",
+            "text": "تركيا"
+        },
+        {
+            "id": "countryCode3.TKM",
+            "text": "تركمانستان"
+        },
+        {
+            "id": "countryCode3.ARE",
+            "text": "الإمارات العربية المتحدة"
+        },
+        {
+            "id": "countryCode3.VIR",
+            "text": "جزر فيرجن الأمريكية"
+        },
+        {
+            "id": "countryCode3.UGA",
+            "text": "أوغندا"
+        },
+        {
+            "id": "countryCode3.UKR",
+            "text": "أوكرانيا"
+        },
+        {
+            "id": "countryCode3.GBR",
+            "text": "المملكة المتحدة"
+        },
+        {
+            "id": "countryCode3.USA",
+            "text": "الولايات المتحدة"
+        },
+        {
+            "id": "countryCode3.URY",
+            "text": "أورغواي"
+        },
+        {
+            "id": "countryCode3.UZB",
+            "text": "أوزبكستان"
+        },
+        {
+            "id": "countryCode3.VUT",
+            "text": "فانواتو"
+        },
+        {
+            "id": "countryCode3.VAT",
+            "text": "الفاتيكان"
+        },
+        {
+            "id": "countryCode3.VEN",
+            "text": "فنزويلا"
+        },
+        {
+            "id": "countryCode3.VNM",
+            "text": "فيتنام"
+        },
+        {
+            "id": "countryCode3.WLF",
+            "text": "جزر والس وفوتونا"
+        },
+        {
+            "id": "countryCode3.SAH",
+            "text": "الصحراء الغربية"
+        },
+        {
+            "id": "countryCode3.YEM",
+            "text": "اليمن"
+        },
+        {
+            "id": "countryCode3.ZMB",
+            "text": "زامبيا"
+        },
+        {
+            "id": "countryCode3.ZWE",
+            "text": "زيمبابوي"
+        }
+    ]
+}

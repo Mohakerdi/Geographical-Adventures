@@ -106,6 +106,29 @@ public class GlobeController : MonoBehaviour
 
 	void HandleInput()
 	{
+		// Touch gestures for mobile (drag to rotate, pinch to zoom)
+		if (Input.touchCount == 1)
+		{
+			Touch touch = Input.GetTouch(0);
+			if (touch.phase == TouchPhase.Moved)
+			{
+				angleX -= touch.deltaPosition.x * 0.25f;
+				angleY += touch.deltaPosition.y * 0.25f;
+				ClampAngleY();
+			}
+		}
+		else if (Input.touchCount >= 2)
+		{
+			Touch t0 = Input.GetTouch(0);
+			Touch t1 = Input.GetTouch(1);
+			Vector2 prevPos0 = t0.position - t0.deltaPosition;
+			Vector2 prevPos1 = t1.position - t1.deltaPosition;
+			float prevDst = (prevPos0 - prevPos1).magnitude;
+			float currDst = (t0.position - t1.position).magnitude;
+			float pinchDelta = currDst - prevDst;
+			targetZoom = Mathf.Clamp(targetZoom - pinchDelta * 0.05f * zoomSensitivity, zoomMinMax.y, zoomMinMax.x);
+		}
+
 		// Zoom
 		float zoomInput = (playerActions.MapControls.MapZoom.ReadValue<float>());
 		float newZoom = targetZoom - zoomInput * zoomSensitivity;
@@ -240,15 +263,26 @@ public class GlobeController : MonoBehaviour
 			countryHighlightStates[i] = Mathf.Clamp01(countryHighlightStates[i] - Time.unscaledDeltaTime * fadeSpeed);
 		}
 
-		countryNameDisplay.rectTransform.localPosition = GetUIPos(Input.mousePosition);
+		Vector2 pointerPos = Input.touchCount > 0 ? (Vector2)Input.GetTouch(0).position : (Vector2)Input.mousePosition;
+		countryNameDisplay.rectTransform.localPosition = GetUIPos(pointerPos);
 		countryNameDisplay.color = new Color(1, 1, 1, Mathf.InverseLerp(0.5f, 1, mostHighlightedValue));
-		countryNameDisplay.text = countryNames[mostHighlightedIndex];
+		string cName = countryNames[mostHighlightedIndex];
+		if (GeoGame.Localization.LocalizationManager.IsRightToLeftWritingSystem)
+		{
+			cName = GeoGame.Localization.Arabic.ArabicFixer.Fix(cName);
+		}
+		countryNameDisplay.text = cName;
 
 		if (overrideTextDisplay)
 		{
-			float textAlpha = Input.GetMouseButton(0) ? 0 : 1;
+			float textAlpha = (Input.GetMouseButton(0) || Input.touchCount > 0) ? 0 : 1;
 			countryNameDisplay.color = new Color(1, 1, 1, textAlpha);
-			countryNameDisplay.text = overridenText;
+			string oText = overridenText;
+			if (GeoGame.Localization.LocalizationManager.IsRightToLeftWritingSystem)
+			{
+				oText = GeoGame.Localization.Arabic.ArabicFixer.Fix(oText);
+			}
+			countryNameDisplay.text = oText;
 		}
 	}
 
