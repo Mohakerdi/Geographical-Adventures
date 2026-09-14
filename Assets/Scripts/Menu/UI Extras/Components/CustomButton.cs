@@ -35,7 +35,14 @@ public class CustomButton : Button
 		base.OnPointerEnter(eventData);
 		if (changeTextOnMouseOver)
 		{
-			SetLabel($"<   {localizer.currentValue}   >");
+			if (LocalizationManager.IsRightToLeftWritingSystem)
+			{
+				SetLabel($">   {localizer.currentValue}   <");
+			}
+			else
+			{
+				SetLabel($"<   {localizer.currentValue}   >");
+			}
 		}
 		onPointerEnter?.Invoke();
 	}

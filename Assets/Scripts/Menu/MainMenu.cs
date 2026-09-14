@@ -22,11 +22,24 @@ public class MainMenu : Menu
 
 	void Start()
 	{
-		version.text = $"Version {Application.version}";
+		UpdateVersionText();
+		GeoGame.Localization.LocalizationManager.onLanguageChanged += UpdateVersionText;
 
 		playButton.onClick.AddListener(PlayGame);
 		quitButton.onClick.AddListener(Quit);
+	}
 
+	void UpdateVersionText()
+	{
+		if (GeoGame.Localization.LocalizationManager.IsRightToLeftWritingSystem)
+		{
+			version.text = GeoGame.Localization.Arabic.ArabicFixer.Fix($"الإصدار {Application.version}");
+			version.isRightToLeftText = false;
+		}
+		else
+		{
+			version.text = $"Version {Application.version}";
+		}
 	}
 
 
@@ -85,6 +98,7 @@ public class MainMenu : Menu
 	void OnDestroy()
 	{
 		blurEffect.enabled = false;
+		GeoGame.Localization.LocalizationManager.onLanguageChanged -= UpdateVersionText;
 	}
 
 }

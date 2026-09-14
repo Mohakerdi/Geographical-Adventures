@@ -93,6 +93,22 @@ namespace GeoGame.InputMobile
 			}
 
 			BuildUI();
+			GeoGame.Localization.LocalizationManager.onLanguageChanged += RebuildUI;
+		}
+
+		private void OnDestroy()
+		{
+			GeoGame.Localization.LocalizationManager.onLanguageChanged -= RebuildUI;
+		}
+
+		private void RebuildUI()
+		{
+			if (canvasObj != null)
+			{
+				Destroy(canvasObj);
+				canvasObj = null;
+			}
+			BuildUI();
 		}
 
 		private void Update()
@@ -302,25 +318,31 @@ namespace GeoGame.InputMobile
 			};
 
 			// Right Action Buttons Area
+			bool isRTL = GeoGame.Localization.LocalizationManager.IsRightToLeftWritingSystem;
+			string dropLabel = isRTL ? GeoGame.Localization.Arabic.ArabicFixer.Fix("إسقاط") + "\n\u25BC" : "DROP\n\u25BC";
+			string boostLabel = isRTL ? GeoGame.Localization.Arabic.ArabicFixer.Fix("تعزيز") + "\n\u26A1" : "BOOST\n\u26A1";
+			string spdUpLabel = isRTL ? "\u25B2\n" + GeoGame.Localization.Arabic.ArabicFixer.Fix("سرعة+") : "\u25B2\nSPD+";
+			string spdDownLabel = isRTL ? "\u25BC\n" + GeoGame.Localization.Arabic.ArabicFixer.Fix("سرعة-") : "\u25BC\nSPD-";
+
 			// 1. DROP PACKAGE BUTTON (Big, circular, prominent gold/yellow)
-			CreateActionButton(parent, "DropButton", new Vector2(-120, 130), new Vector2(110, 110), "DROP\n\u25BC",
+			CreateActionButton(parent, "DropButton", new Vector2(-120, 130), new Vector2(110, 110), dropLabel,
 				new Color(0.95f, 0.65f, 0.15f, 0.85f),
 				onDown: () => { dropPackageTriggered = true; });
 
 			// 2. BOOST BUTTON (Cyan/electric blue)
-			CreateActionButton(parent, "BoostButton", new Vector2(-250, 110), new Vector2(85, 85), "BOOST\n\u26A1",
+			CreateActionButton(parent, "BoostButton", new Vector2(-250, 110), new Vector2(85, 85), boostLabel,
 				new Color(0.1f, 0.7f, 0.95f, 0.85f),
 				onDown: () => { IsBoosting = true; },
 				onUp: () => { IsBoosting = false; });
 
 			// 3. SPEED UP BUTTON (▲)
-			CreateActionButton(parent, "SpeedUpButton", new Vector2(-120, 270), new Vector2(75, 75), "\u25B2\nSPD+",
+			CreateActionButton(parent, "SpeedUpButton", new Vector2(-120, 270), new Vector2(75, 75), spdUpLabel,
 				new Color(0.2f, 0.75f, 0.4f, 0.8f),
 				onDown: () => { SpeedInput = 1f; },
 				onUp: () => { SpeedInput = 0f; });
 
 			// 4. SPEED DOWN BUTTON (▼)
-			CreateActionButton(parent, "SpeedDownButton", new Vector2(-220, 220), new Vector2(75, 75), "\u25BC\nSPD-",
+			CreateActionButton(parent, "SpeedDownButton", new Vector2(-220, 220), new Vector2(75, 75), spdDownLabel,
 				new Color(0.85f, 0.3f, 0.3f, 0.8f),
 				onDown: () => { SpeedInput = -1f; },
 				onUp: () => { SpeedInput = 0f; });
@@ -328,6 +350,10 @@ namespace GeoGame.InputMobile
 
 		private void CreateTopBar(Transform parent)
 		{
+			bool isRTL = GeoGame.Localization.LocalizationManager.IsRightToLeftWritingSystem;
+			string mapLabel = isRTL ? GeoGame.Localization.Arabic.ArabicFixer.Fix("خريطة") + "\n\uD83C\uDF0D" : "MAP\n\uD83C\uDF0D";
+			string camLabel = isRTL ? GeoGame.Localization.Arabic.ArabicFixer.Fix("كاميرا") + "\n\uD83D\uDCF7" : "CAM\n\uD83D\uDCF7";
+
 			// Top-Left: Pause Button (⏸)
 			CreateActionButton(parent, "PauseButton", new Vector2(70, -60), new Vector2(70, 70), "\u2759\u2759",
 				new Color(0.2f, 0.25f, 0.3f, 0.8f),
@@ -335,13 +361,13 @@ namespace GeoGame.InputMobile
 				anchorMin: new Vector2(0, 1), anchorMax: new Vector2(0, 1));
 
 			// Top-Right: Map Button (🗺)
-			CreateActionButton(parent, "MapButton", new Vector2(-70, -60), new Vector2(70, 70), "MAP\n\uD83C\uDF0D",
+			CreateActionButton(parent, "MapButton", new Vector2(-70, -60), new Vector2(70, 70), mapLabel,
 				new Color(0.2f, 0.5f, 0.85f, 0.85f),
 				onDown: () => { toggleMapTriggered = true; },
 				anchorMin: new Vector2(1, 1), anchorMax: new Vector2(1, 1));
 
 			// Top-Right: Camera View Button (📷)
-			CreateActionButton(parent, "CamButton", new Vector2(-160, -60), new Vector2(70, 70), "CAM\n\uD83D\uDCF7",
+			CreateActionButton(parent, "CamButton", new Vector2(-160, -60), new Vector2(70, 70), camLabel,
 				new Color(0.3f, 0.35f, 0.4f, 0.8f),
 				onDown: () => { cycleCameraTriggered = true; },
 				anchorMin: new Vector2(1, 1), anchorMax: new Vector2(1, 1));
@@ -349,8 +375,11 @@ namespace GeoGame.InputMobile
 
 		private void CreateMapControls(Transform parent)
 		{
+			bool isRTL = GeoGame.Localization.LocalizationManager.IsRightToLeftWritingSystem;
+			string backFlightLabel = isRTL ? "\u2716 " + GeoGame.Localization.Arabic.ArabicFixer.Fix("العودة للطيران") : "\u2716 BACK TO FLIGHT";
+
 			// "CLOSE MAP / RETURN TO FLIGHT" button in top-center
-			CreateActionButton(parent, "CloseMapButton", new Vector2(0, -65), new Vector2(220, 60), "\u2716 BACK TO FLIGHT",
+			CreateActionButton(parent, "CloseMapButton", new Vector2(0, -65), new Vector2(230, 60), backFlightLabel,
 				new Color(0.85f, 0.25f, 0.25f, 0.9f),
 				onDown: () => { toggleMapTriggered = true; },
 				anchorMin: new Vector2(0.5f, 1), anchorMax: new Vector2(0.5f, 1));
@@ -397,18 +426,18 @@ namespace GeoGame.InputMobile
 			img.sprite = circleSprite;
 			img.color = color;
 
-			// Label
-			GameObject labelObj = new GameObject("Label", typeof(RectTransform), typeof(Text));
+			// Label using TextMeshProUGUI for proper Arabic font fallback and crisp SDF rendering
+			GameObject labelObj = new GameObject("Label", typeof(RectTransform), typeof(TMPro.TextMeshProUGUI));
 			labelObj.transform.SetParent(btnObj.transform, false);
 			StretchFull(labelObj.GetComponent<RectTransform>());
 
-			Text txt = labelObj.GetComponent<Text>();
+			TMPro.TextMeshProUGUI txt = labelObj.GetComponent<TMPro.TextMeshProUGUI>();
 			txt.text = labelText;
-			txt.font = Resources.GetBuiltinResource<Font>("Arial.ttf");
-			txt.fontSize = (int)(Mathf.Min(size.x, size.y) * 0.28f);
-			txt.alignment = TextAnchor.MiddleCenter;
+			txt.fontSize = Mathf.Min(size.x, size.y) * 0.28f;
+			txt.alignment = TMPro.TextAlignmentOptions.Center;
 			txt.color = Color.white;
 			txt.raycastTarget = false;
+			txt.isRightToLeftText = false;
 
 			// Touch triggers with visual bounce
 			TouchTrigger trigger = btnObj.GetComponent<TouchTrigger>();

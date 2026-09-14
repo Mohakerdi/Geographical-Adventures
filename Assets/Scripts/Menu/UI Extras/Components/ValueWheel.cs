@@ -76,7 +76,13 @@ public class ValueWheel : MonoBehaviour
 
 		if (values != null && values.Length > 0)
 		{
-			valueLabel.text = values[activeValueIndex];
+			string val = values[activeValueIndex];
+			if (GeoGame.Localization.Arabic.ArabicFixer.ContainsArabic(val))
+			{
+				val = GeoGame.Localization.Arabic.ArabicFixer.Fix(val);
+				valueLabel.isRightToLeftText = false;
+			}
+			valueLabel.text = val;
 		}
 	}
 

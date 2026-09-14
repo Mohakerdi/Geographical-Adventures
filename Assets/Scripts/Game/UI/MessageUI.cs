@@ -22,8 +22,14 @@ public class MessageUI : MonoBehaviour
 			activeMessage.active = false;
 		}
 
+		if (GeoGame.Localization.LocalizationManager.IsRightToLeftWritingSystem)
+		{
+			messageText = GeoGame.Localization.Arabic.ArabicFixer.Fix(messageText);
+		}
+
 		var messageTextInstance = Instantiate(messagePrefab, parent: messageHolder);
 		messageTextInstance.text = messageText;
+		messageTextInstance.isRightToLeftText = false;
 		Message message = new Message() { text = messageTextInstance, active = true, visibleDuration = duration };
 		activeMessage = message;
 		StartCoroutine(AnimateMessage(activeMessage));

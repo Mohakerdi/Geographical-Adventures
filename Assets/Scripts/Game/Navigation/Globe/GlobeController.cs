@@ -267,10 +267,7 @@ public class GlobeController : MonoBehaviour
 		countryNameDisplay.rectTransform.localPosition = GetUIPos(pointerPos);
 		countryNameDisplay.color = new Color(1, 1, 1, Mathf.InverseLerp(0.5f, 1, mostHighlightedValue));
 		string cName = countryNames[mostHighlightedIndex];
-		if (GeoGame.Localization.LocalizationManager.IsRightToLeftWritingSystem)
-		{
-			cName = GeoGame.Localization.Arabic.ArabicFixer.Fix(cName);
-		}
+		cName = GeoGame.Localization.LocalizationManager.LocalizeCountryName(cName);
 		countryNameDisplay.text = cName;
 
 		if (overrideTextDisplay)

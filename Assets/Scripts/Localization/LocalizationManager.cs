@@ -133,6 +133,49 @@ namespace GeoGame.Localization
 			}
 		}
 
+		static Dictionary<string, string> englishNameToCountryId;
+
+		void BuildEnglishCountryLookup()
+		{
+			englishNameToCountryId = new Dictionary<string, string>(System.StringComparer.OrdinalIgnoreCase);
+			if (defaultLanguage != null && languageLookup.ContainsKey(defaultLanguage))
+			{
+				foreach (var pair in languageLookup[defaultLanguage])
+				{
+					if (pair.Key.StartsWith("countryCode3."))
+					{
+						string name = pair.Value.Trim();
+						if (!englishNameToCountryId.ContainsKey(name))
+						{
+							englishNameToCountryId.Add(name, pair.Key);
+						}
+					}
+				}
+			}
+		}
+
+		public static string LocalizeCountryName(string countryName)
+		{
+			if (string.IsNullOrEmpty(countryName)) return countryName;
+
+			if (englishNameToCountryId == null)
+			{
+				Instance.BuildEnglishCountryLookup();
+			}
+
+			if (englishNameToCountryId != null && englishNameToCountryId.TryGetValue(countryName.Trim(), out string id))
+			{
+				return Localize(id);
+			}
+
+			if (IsRightToLeftWritingSystem)
+			{
+				return Arabic.ArabicFixer.Fix(countryName);
+			}
+
+			return countryName;
+		}
+
 		public int GetIndexFromID(string languageID)
 		{
 			int languageIndex = -1;

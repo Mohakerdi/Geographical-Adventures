@@ -66,7 +66,7 @@ namespace GeoGame.Quest
 			string countryCode = location.country.alpha3Code;
 			//string countryName = location.GetCountryDisplayName(maxCountryNameLength);
 			string countryName = Localization.LocalizationManager.Localize($"countryCode3.{countryCode}");
-			if (countryName.Length > maxCountryNameLength)
+			if (!Localization.LocalizationManager.IsRightToLeftWritingSystem && countryName.Length > maxCountryNameLength)
 			{
 				countryName = location.country.abbreviation;
 			}

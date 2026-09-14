@@ -217,10 +217,11 @@ namespace GeoGame.Quest
 				}
 				else
 				{
-					string message = "You don't have any packages to deliver!";
-					//message = $"The package will land in Denmark instead of France, but it was still pretty close. Only 3000 kilometers off target.\nSome more text";
+					string message = Localization.LocalizationManager.IsRightToLeftWritingSystem
+						? "ليس لديك أي طرود لتسليمها حالياً!"
+						: "You don't have any packages to deliver!";
 					messageUI.ShowMessage(message, 1);
-					Debug.Log("You don't have any packages to deliver!");
+					Debug.Log(message);
 				}
 			}
 		}
@@ -299,8 +300,13 @@ namespace GeoGame.Quest
 			quest.hasPickedUp = true;
 			questUI.SetTarget(questIndex, quest.deliverLocation, isPickup: false, animate: true);
 
-			string countryName = quest.deliverLocation.GetCountryDisplayName();
-			string message = $"You collected a package! It's marked for delivery to {quest.deliverLocation.city.name}, {countryName}";
+			string countryName = Localization.LocalizationManager.IsRightToLeftWritingSystem
+				? Localization.LocalizationManager.Localize($"countryCode3.{quest.deliverLocation.country.alpha3Code}")
+				: quest.deliverLocation.GetCountryDisplayName();
+
+			string message = Localization.LocalizationManager.IsRightToLeftWritingSystem
+				? $"تم استلام الطرد! وجهة التسليم: {quest.deliverLocation.city.name}، {countryName}"
+				: $"You collected a package! It's marked for delivery to {quest.deliverLocation.city.name}, {countryName}";
 			messageUI.ShowMessage(message, pickupMessageDuration);
 			Debug.Log(message);
 			//questUI.SetTarget(questIndex, quest.deliverCountry, quest.deliverCity, isPickup: false);
@@ -329,83 +335,114 @@ namespace GeoGame.Quest
 
 		string CreateResultMessage(DeliveryResult result)
 		{
+			bool isRTL = Localization.LocalizationManager.IsRightToLeftWritingSystem;
 			string dstString = DistanceString(result.distanceKM);
 			string cityName = result.targetCity.name;
-			string targetCountryName = result.targetCountry.GetPreferredDisplayName(15);
-			string landedInCountryName = "ocean";
+			string targetCountryName = isRTL
+				? Localization.LocalizationManager.Localize($"countryCode3.{result.targetCountry.alpha3Code}")
+				: result.targetCountry.GetPreferredDisplayName(15);
+			string landedInCountryName = isRTL ? "المحيط" : "ocean";
 			if (result.countryPackageLandedIn != null)
 			{
-				landedInCountryName = result.countryPackageLandedIn.GetPreferredDisplayName(15);
+				landedInCountryName = isRTL
+					? Localization.LocalizationManager.Localize($"countryCode3.{result.countryPackageLandedIn.alpha3Code}")
+					: result.countryPackageLandedIn.GetPreferredDisplayName(15);
 			}
-			// Create result message
 
-			// Perfect delivery
+			// Create result message
 			if (result.distanceKM <= perfectRadius)
 			{
 				if (result.distanceKM > 20)
 				{
 					if (result.landedInOcean)
 					{
-						return $"Perfect delivery! The package will land just {dstString} from the city centre (although in the water, unfortunately).";
+						return isRTL
+							? $"تسليم مثالي! سيهبط الطرد على بعد {dstString} فقط من مركز المدينة (للأسف في الماء)."
+							: $"Perfect delivery! The package will land just {dstString} from the city centre (although in the water, unfortunately).";
 					}
 					else if (!result.landedInCorrectCountry)
 					{
-						return $"Perfect delivery! The package will land just {dstString} from the city centre (but will have to be brought across from {landedInCountryName} to {targetCountryName}).";
+						return isRTL
+							? $"تسليم مثالي! سيهبط الطرد على بعد {dstString} فقط من مركز المدينة (ولكن سينقل من {landedInCountryName} إلى {targetCountryName})."
+							: $"Perfect delivery! The package will land just {dstString} from the city centre (but will have to be brought across from {landedInCountryName} to {targetCountryName}).";
 					}
 				}
 
-				return $"Perfect delivery! The package will land just {dstString} from the city centre.";
+				return isRTL
+					? $"تسليم مثالي! سيهبط الطرد على بعد {dstString} فقط من مركز المدينة."
+					: $"Perfect delivery! The package will land just {dstString} from the city centre.";
 			}
-			// Good delivery
 			else if (result.distanceKM <= goodRadius)
 			{
 				if (result.landedInCorrectCountry)
 				{
-					return $"Good enough! The package will land {dstString} from the city.";
+					return isRTL
+						? $"تسليم جيد جداً! سيهبط الطرد على بعد {dstString} من المدينة."
+						: $"Good enough! The package will land {dstString} from the city.";
 				}
 				else if (result.landedInOcean)
 				{
-					return $"Good enough! The package will land {dstString} from the city, but will have to be fished out of the water.";
+					return isRTL
+						? $"تسليم جيد جداً! سيهبط الطرد على بعد {dstString} من المدينة، ولكن سيتوجب انتشاله من الماء."
+						: $"Good enough! The package will land {dstString} from the city, but will have to be fished out of the water.";
 				}
 				else
 				{
-					return $"Good enough! The package will land {dstString} from the city (but will have to be transported from {landedInCountryName} to {targetCountryName}).";
+					return isRTL
+						? $"تسليم جيد جداً! سيهبط الطرد على بعد {dstString} من المدينة (وسينقل من {landedInCountryName} إلى {targetCountryName})."
+						: $"Good enough! The package will land {dstString} from the city (but will have to be transported from {landedInCountryName} to {targetCountryName}).";
 				}
 			}
 			else if (result.distanceKM <= okRadius)
 			{
 				if (result.landedInCorrectCountry)
 				{
-					return $"An okay attempt. The package will land {dstString} from the city.";
+					return isRTL
+						? $"محاولة مقبولة! سيهبط الطرد على بعد {dstString} من المدينة."
+						: $"An okay attempt. The package will land {dstString} from the city.";
 				}
 				else if (result.landedInOcean)
 				{
-					return $"An okay attempt. The package will land {dstString} from the city, and will have to be fished out of the water.";
+					return isRTL
+						? $"محاولة مقبولة! سيهبط الطرد على بعد {dstString} من المدينة، وسيتوجب انتشاله من الماء."
+						: $"An okay attempt. The package will land {dstString} from the city, and will have to be fished out of the water.";
 				}
 				else
 				{
-					return $"An okay attempt. The package will land {dstString} from the city (and will have to be transported from {landedInCountryName} to {targetCountryName}).";
+					return isRTL
+						? $"محاولة مقبولة! سيهبط الطرد على بعد {dstString} من المدينة (وسينقل من {landedInCountryName} إلى {targetCountryName})."
+						: $"An okay attempt. The package will land {dstString} from the city (and will have to be transported from {landedInCountryName} to {targetCountryName}).";
 				}
 			}
 			else
 			{
 				if (result.landedInCorrectCountry)
 				{
-					return $"Oh no! The package will land {dstString} away from the city. On the bright side, it's in the right country at least!";
+					return isRTL
+						? $"للأسف بعيد! سيهبط الطرد على بعد {dstString} من المدينة. لحسن الحظ هبط في الدولة الصحيحة!"
+						: $"Oh no! The package will land {dstString} away from the city. On the bright side, it's in the right country at least!";
 				}
 				else if (result.landedInOcean)
 				{
-					return $"Oh no! The package will land in the water, {dstString} away from the city.";
+					return isRTL
+						? $"للأسف! سيهبط الطرد في الماء على بعد {dstString} من المدينة."
+						: $"Oh no! The package will land in the water, {dstString} away from the city.";
 				}
 				else
 				{
-					return $"Oh no! The package will land {dstString} away from the city, and in {landedInCountryName} instead of {targetCountryName}.";
+					return isRTL
+						? $"للأسف! سيهبط الطرد على بعد {dstString} من المدينة، وفي {landedInCountryName} بدلاً من {targetCountryName}."
+						: $"Oh no! The package will land {dstString} away from the city, and in {landedInCountryName} instead of {targetCountryName}.";
 				}
 			}
 
 			string DistanceString(float dstKm)
 			{
 				int dstRounded = Mathf.CeilToInt(dstKm);
+				if (isRTL)
+				{
+					return $"{dstRounded} كم";
+				}
 				string s = dstRounded + " kilometre";
 				if (dstRounded != 1)
 				{

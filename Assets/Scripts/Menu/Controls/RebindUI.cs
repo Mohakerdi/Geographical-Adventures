@@ -35,8 +35,10 @@ public class RebindUI : MonoBehaviour
 
 	void RequestRebind()
 	{
-
-		rebindText.text = "press any key";
+		rebindText.text = GeoGame.Localization.LocalizationManager.IsRightToLeftWritingSystem
+			? GeoGame.Localization.Arabic.ArabicFixer.Fix("اضغط على أي مفتاح")
+			: "press any key";
+		rebindText.isRightToLeftText = false;
 		onRebindRequested?.Invoke(this);
 	}
 
