@@ -49,6 +49,13 @@ public class SettingsMenu : Menu
 		AddListeners();
 		ApplySettings(Settings.LoadSavedSettings());
 		SetUpScreen();
+		SetupMobileSettingsUI();
+		LocalizationManager.onLanguageChanged += UpdateMobileSettingsLabels;
+	}
+
+	void OnDestroy()
+	{
+		LocalizationManager.onLanguageChanged -= UpdateMobileSettingsLabels;
 	}
 
 	void AddListeners()
@@ -378,6 +385,7 @@ public class SettingsMenu : Menu
 				RebindManager.Instance.OnSettingsOpened();
 			}
 			SetUIFromSettings(lastAppliedSettings);
+			SetupMobileSettingsUI();
 		}
 	}
 
@@ -426,8 +434,238 @@ public class SettingsMenu : Menu
 		}
 	}
 
+	// Mobile Controls Settings (Opacity / Transient Level)
+	private GameObject mobileSettingsCard;
+	private TMP_Text mobileOpacityValueText;
+	private static readonly float[] OpacityLevels = new float[] { 0.20f, 0.40f, 0.60f, 0.80f, 1.00f };
+	private static readonly string[] OpacityNames = new string[] { "20%", "40%", "60%", "80%", "100%" };
+	private int activeOpacityIndex = 3; // default 80%
 
+	void SetupMobileSettingsUI()
+	{
+		if (mobileSettingsCard != null)
+		{
+			UpdateMobileSettingsLabels();
+			return;
+		}
 
+		Transform controlsContainer = null;
+		if (tabGroup != null && tabGroup.tabs != null && tabGroup.tabs.Length > 2 && tabGroup.tabs[2].holder != null)
+		{
+			controlsContainer = tabGroup.tabs[2].holder.transform;
+		}
+		if (controlsContainer == null) return;
+
+		// Find ScrollRect content if present
+		ScrollRect scroll = controlsContainer.GetComponentInChildren<ScrollRect>(true);
+		Transform parent = (scroll != null && scroll.content != null) ? scroll.content : controlsContainer;
+
+		// Load current opacity setting
+		float currentOp = PlayerPrefs.GetFloat("MobileControls_Opacity", 0.80f);
+		activeOpacityIndex = 3;
+		for (int i = 0; i < OpacityLevels.Length; i++)
+		{
+			if (Mathf.Abs(OpacityLevels[i] - currentOp) < 0.05f)
+			{
+				activeOpacityIndex = i;
+				break;
+			}
+		}
+
+		// Create Card Container
+		mobileSettingsCard = new GameObject("MobileControlsSettingsCard", typeof(RectTransform), typeof(Image), typeof(VerticalLayoutGroup));
+		mobileSettingsCard.transform.SetParent(parent, false);
+		mobileSettingsCard.transform.SetSiblingIndex(0); // Position at top of Controls tab
+
+		RectTransform cardRt = mobileSettingsCard.GetComponent<RectTransform>();
+		cardRt.sizeDelta = new Vector2(900, 155);
+
+		Image cardImg = mobileSettingsCard.GetComponent<Image>();
+		cardImg.sprite = GeoGame.UI.FlightUITheme.PanelHUDSprite;
+		cardImg.type = Image.Type.Sliced;
+		cardImg.color = new Color(0.08f, 0.14f, 0.20f, 0.92f);
+
+		VerticalLayoutGroup vlg = mobileSettingsCard.GetComponent<VerticalLayoutGroup>();
+		vlg.padding = new RectOffset(25, 25, 14, 14);
+		vlg.spacing = 10;
+		vlg.childControlWidth = true;
+		vlg.childControlHeight = false;
+		vlg.childForceExpandWidth = true;
+		vlg.childForceExpandHeight = false;
+
+		// 1. Header
+		GameObject headerGo = new GameObject("Header", typeof(RectTransform), typeof(TMP_Text));
+		headerGo.transform.SetParent(mobileSettingsCard.transform, false);
+		RectTransform hRt = headerGo.GetComponent<RectTransform>();
+		hRt.sizeDelta = new Vector2(0, 32);
+		TMP_Text hTxt = headerGo.GetComponent<TMP_Text>();
+		hTxt.fontSize = 24;
+		hTxt.fontStyle = FontStyles.Bold;
+		hTxt.color = new Color(0f, 0.85f, 1f, 1f); // Neon Cyan HUD
+		hTxt.alignment = TextAlignmentOptions.Center;
+
+		// 2. Opacity / Transient Level Row
+		GameObject rowGo = new GameObject("OpacityRow", typeof(RectTransform), typeof(HorizontalLayoutGroup));
+		rowGo.transform.SetParent(mobileSettingsCard.transform, false);
+		RectTransform rowRt = rowGo.GetComponent<RectTransform>();
+		rowRt.sizeDelta = new Vector2(0, 58);
+		HorizontalLayoutGroup rowHlg = rowGo.GetComponent<HorizontalLayoutGroup>();
+		rowHlg.childControlWidth = false;
+		rowHlg.childControlHeight = true;
+		rowHlg.childForceExpandWidth = false;
+		rowHlg.childForceExpandHeight = true;
+		rowHlg.spacing = 20;
+
+		// Row Title Label
+		GameObject titleGo = new GameObject("Title", typeof(RectTransform), typeof(TMP_Text));
+		titleGo.transform.SetParent(rowGo.transform, false);
+		RectTransform titleRt = titleGo.GetComponent<RectTransform>();
+		titleRt.sizeDelta = new Vector2(400, 50);
+		TMP_Text titleTxt = titleGo.GetComponent<TMP_Text>();
+		titleTxt.fontSize = 22;
+		titleTxt.color = Color.white;
+		titleTxt.alignment = TextAlignmentOptions.MidlineLeft;
+
+		// Stepper Container: [<] [ 80% ] [>]
+		GameObject stepperGo = new GameObject("Stepper", typeof(RectTransform), typeof(HorizontalLayoutGroup));
+		stepperGo.transform.SetParent(rowGo.transform, false);
+		RectTransform stepperRt = stepperGo.GetComponent<RectTransform>();
+		stepperRt.sizeDelta = new Vector2(260, 50);
+		HorizontalLayoutGroup stepHlg = stepperGo.GetComponent<HorizontalLayoutGroup>();
+		stepHlg.childControlWidth = false;
+		stepHlg.childControlHeight = true;
+		stepHlg.childForceExpandWidth = false;
+		stepHlg.childForceExpandHeight = true;
+		stepHlg.spacing = 10;
+
+		// Left Button [<]
+		GameObject btnLeftGo = new GameObject("BtnDecrease", typeof(RectTransform), typeof(Image), typeof(Button));
+		btnLeftGo.transform.SetParent(stepperGo.transform, false);
+		btnLeftGo.GetComponent<RectTransform>().sizeDelta = new Vector2(50, 50);
+		btnLeftGo.GetComponent<Image>().sprite = GeoGame.UI.FlightUITheme.ButtonNormalSprite;
+		btnLeftGo.GetComponent<Image>().type = Image.Type.Sliced;
+		Button btnLeft = btnLeftGo.GetComponent<Button>();
+		GameObject txtLeftGo = new GameObject("Txt", typeof(RectTransform), typeof(TMP_Text));
+		txtLeftGo.transform.SetParent(btnLeftGo.transform, false);
+		StretchFull(txtLeftGo.GetComponent<RectTransform>());
+		TMP_Text lTxt = txtLeftGo.GetComponent<TMP_Text>();
+		lTxt.text = "<";
+		lTxt.fontSize = 26;
+		lTxt.fontStyle = FontStyles.Bold;
+		lTxt.alignment = TextAlignmentOptions.Center;
+		lTxt.color = Color.white;
+
+		// Value Box [ 80% ]
+		GameObject valBoxGo = new GameObject("ValBox", typeof(RectTransform), typeof(Image));
+		valBoxGo.transform.SetParent(stepperGo.transform, false);
+		valBoxGo.GetComponent<RectTransform>().sizeDelta = new Vector2(130, 50);
+		valBoxGo.GetComponent<Image>().sprite = GeoGame.UI.FlightUITheme.ButtonNormalSprite;
+		valBoxGo.GetComponent<Image>().type = Image.Type.Sliced;
+		valBoxGo.GetComponent<Image>().color = new Color(0.05f, 0.10f, 0.16f, 0.9f);
+		GameObject valTxtGo = new GameObject("ValTxt", typeof(RectTransform), typeof(TMP_Text));
+		valTxtGo.transform.SetParent(valBoxGo.transform, false);
+		StretchFull(valTxtGo.GetComponent<RectTransform>());
+		mobileOpacityValueText = valTxtGo.GetComponent<TMP_Text>();
+		mobileOpacityValueText.fontSize = 24;
+		mobileOpacityValueText.fontStyle = FontStyles.Bold;
+		mobileOpacityValueText.alignment = TextAlignmentOptions.Center;
+		mobileOpacityValueText.color = new Color(0f, 0.9f, 1f, 1f); // Neon cyan
+		mobileOpacityValueText.text = OpacityNames[activeOpacityIndex];
+
+		// Right Button [>]
+		GameObject btnRightGo = new GameObject("BtnIncrease", typeof(RectTransform), typeof(Image), typeof(Button));
+		btnRightGo.transform.SetParent(stepperGo.transform, false);
+		btnRightGo.GetComponent<RectTransform>().sizeDelta = new Vector2(50, 50);
+		btnRightGo.GetComponent<Image>().sprite = GeoGame.UI.FlightUITheme.ButtonNormalSprite;
+		btnRightGo.GetComponent<Image>().type = Image.Type.Sliced;
+		Button btnRight = btnRightGo.GetComponent<Button>();
+		GameObject txtRightGo = new GameObject("Txt", typeof(RectTransform), typeof(TMP_Text));
+		txtRightGo.transform.SetParent(btnRightGo.transform, false);
+		StretchFull(txtRightGo.GetComponent<RectTransform>());
+		TMP_Text rTxt = txtRightGo.GetComponent<TMP_Text>();
+		rTxt.text = ">";
+		rTxt.fontSize = 26;
+		rTxt.fontStyle = FontStyles.Bold;
+		rTxt.alignment = TextAlignmentOptions.Center;
+		rTxt.color = Color.white;
+
+		btnLeft.onClick.AddListener(() =>
+		{
+			if (activeOpacityIndex > 0)
+			{
+				activeOpacityIndex--;
+				ApplyOpacityChange();
+			}
+		});
+
+		btnRight.onClick.AddListener(() =>
+		{
+			if (activeOpacityIndex < OpacityLevels.Length - 1)
+			{
+				activeOpacityIndex++;
+				ApplyOpacityChange();
+			}
+		});
+
+		UpdateMobileSettingsLabels();
+	}
+
+	void ApplyOpacityChange()
+	{
+		float val = OpacityLevels[activeOpacityIndex];
+		if (mobileOpacityValueText != null)
+		{
+			mobileOpacityValueText.text = OpacityNames[activeOpacityIndex];
+		}
+		if (GeoGame.InputMobile.MobileControls.Instance != null)
+		{
+			GeoGame.InputMobile.MobileControls.Instance.SetOpacity(val);
+		}
+		else
+		{
+			PlayerPrefs.SetFloat("MobileControls_Opacity", val);
+			PlayerPrefs.Save();
+		}
+	}
+
+	void UpdateMobileSettingsLabels()
+	{
+		if (mobileSettingsCard == null) return;
+		bool isRTL = GeoGame.Localization.LocalizationManager.IsRightToLeftWritingSystem;
+
+		TMP_Text hTxt = mobileSettingsCard.transform.Find("Header")?.GetComponent<TMP_Text>();
+		if (hTxt != null)
+		{
+			if (isRTL && GeoGame.Localization.Arabic.ArabicFontManager.ArabicFontAsset != null)
+			{
+				hTxt.font = GeoGame.Localization.Arabic.ArabicFontManager.ArabicFontAsset;
+			}
+			hTxt.text = isRTL ? GeoGame.Localization.Arabic.ArabicFixer.Fix("أزرار التحكم باللمس (موبايل)") : "MOBILE TOUCH CONTROLS";
+		}
+
+		TMP_Text titleTxt = mobileSettingsCard.transform.Find("OpacityRow/Title")?.GetComponent<TMP_Text>();
+		if (titleTxt != null)
+		{
+			if (isRTL && GeoGame.Localization.Arabic.ArabicFontManager.ArabicFontAsset != null)
+			{
+				titleTxt.font = GeoGame.Localization.Arabic.ArabicFontManager.ArabicFontAsset;
+			}
+			titleTxt.text = isRTL ? GeoGame.Localization.Arabic.ArabicFixer.Fix("شفافية الأزرار (Transient Level)") : "Button Opacity (Transient Level)";
+		}
+
+		if (mobileOpacityValueText != null)
+		{
+			mobileOpacityValueText.text = OpacityNames[activeOpacityIndex];
+		}
+	}
+
+	private void StretchFull(RectTransform rt)
+	{
+		rt.anchorMin = Vector2.zero;
+		rt.anchorMax = Vector2.one;
+		rt.offsetMin = Vector2.zero;
+		rt.offsetMax = Vector2.zero;
+	}
 }
 
 
@@ -449,6 +687,9 @@ public struct Settings
 	public float musicVolume;
 	public float sfxVolume;
 
+	// Controls
+	public float mobileControlsOpacity;
+
 	// Load settings from prefs
 	public static Settings LoadSavedSettings()
 	{
@@ -466,6 +707,9 @@ public struct Settings
 		settings.masterVolume = PlayerPrefs.GetFloat(nameof(masterVolume), defaultValue: 0.75f);
 		settings.musicVolume = PlayerPrefs.GetFloat(nameof(musicVolume), defaultValue: 0.75f);
 		settings.sfxVolume = PlayerPrefs.GetFloat(nameof(sfxVolume), defaultValue: 0.75f);
+
+		// Controls
+		settings.mobileControlsOpacity = PlayerPrefs.GetFloat("MobileControls_Opacity", defaultValue: 0.80f);
 		return settings;
 	}
 
@@ -482,6 +726,9 @@ public struct Settings
 		PlayerPrefs.SetFloat(nameof(masterVolume), settings.masterVolume);
 		PlayerPrefs.SetFloat(nameof(musicVolume), settings.musicVolume);
 		PlayerPrefs.SetFloat(nameof(sfxVolume), settings.sfxVolume);
+
+		// Controls
+		PlayerPrefs.SetFloat("MobileControls_Opacity", settings.mobileControlsOpacity);
 
 		// Write
 		PlayerPrefs.Save();

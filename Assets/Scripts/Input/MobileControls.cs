@@ -33,6 +33,7 @@ namespace GeoGame.InputMobile
 		// UI Elements
 		private GameObject canvasObj;
 		private Canvas canvas;
+		private CanvasGroup masterCanvasGroup;
 		private CanvasGroup flightControlsGroup;
 		private CanvasGroup mapControlsGroup;
 
@@ -40,13 +41,35 @@ namespace GeoGame.InputMobile
 		private RectTransform joystickBaseRect;
 		private RectTransform joystickKnobRect;
 		private Vector2 joystickBasePos;
-		private float joystickRadius = 90f;
+		private float joystickRadius = 110f;
 		private int joystickPointerId = -1;
 
 		// Cached procedural textures
 		private static Sprite circleSprite;
 		private static Sprite circleHollowSprite;
 		private static Sprite roundedRectSprite;
+
+		public static event System.Action<float> onOpacityChanged;
+
+		public static float ControlsOpacity
+		{
+			get
+			{
+				return PlayerPrefs.GetFloat("MobileControls_Opacity", 0.80f);
+			}
+		}
+
+		public void SetOpacity(float opacity)
+		{
+			float clamped = Mathf.Clamp(opacity, 0.20f, 1.0f);
+			PlayerPrefs.SetFloat("MobileControls_Opacity", clamped);
+			PlayerPrefs.Save();
+			if (masterCanvasGroup != null)
+			{
+				masterCanvasGroup.alpha = clamped;
+			}
+			onOpacityChanged?.Invoke(clamped);
+		}
 
 		public bool IsActive
 		{
@@ -228,6 +251,9 @@ namespace GeoGame.InputMobile
 
 			canvasObj.AddComponent<GraphicRaycaster>();
 
+			masterCanvasGroup = canvasObj.AddComponent<CanvasGroup>();
+			masterCanvasGroup.alpha = ControlsOpacity;
+
 			// 1. Flight Controls Container
 			GameObject flightGo = new GameObject("FlightControls", typeof(RectTransform), typeof(CanvasGroup));
 			flightGo.transform.SetParent(canvasObj.transform, false);
@@ -268,7 +294,7 @@ namespace GeoGame.InputMobile
 			joystickBaseRect.anchorMin = new Vector2(0, 0);
 			joystickBaseRect.anchorMax = new Vector2(0, 0);
 			joystickBaseRect.pivot = new Vector2(0.5f, 0.5f);
-			joystickBasePos = new Vector2(180, 180);
+			joystickBasePos = new Vector2(190, 190);
 			joystickBaseRect.anchoredPosition = joystickBasePos;
 			joystickBaseRect.sizeDelta = new Vector2(joystickRadius * 2, joystickRadius * 2);
 
@@ -295,7 +321,7 @@ namespace GeoGame.InputMobile
 			joyKnob.transform.SetParent(joyBase.transform, false);
 			joystickKnobRect = joyKnob.GetComponent<RectTransform>();
 			joystickKnobRect.anchoredPosition = Vector2.zero;
-			joystickKnobRect.sizeDelta = new Vector2(76, 76);
+			joystickKnobRect.sizeDelta = new Vector2(88, 88);
 			Image knobImg = joyKnob.GetComponent<Image>();
 			knobImg.sprite = GeoGame.UI.FlightUITheme.AttitudeIndicatorSprite != null ? GeoGame.UI.FlightUITheme.AttitudeIndicatorSprite : circleSprite;
 			knobImg.color = Color.white;
@@ -337,32 +363,32 @@ namespace GeoGame.InputMobile
 				}
 			};
 
-			// Right Action Buttons Area (Flight HUD Themed)
+			// Right Action Buttons Area (Flight HUD Themed - Enlarged for Mobile Ergonomics)
 			bool isRTL = GeoGame.Localization.LocalizationManager.IsRightToLeftWritingSystem;
-			string dropLabel = isRTL ? "✈ " + GeoGame.Localization.Arabic.ArabicFixer.Fix("إسقاط") + "\n\u25BC" : "✈ DROP\n\u25BC";
-			string boostLabel = isRTL ? "\u26A1 " + GeoGame.Localization.Arabic.ArabicFixer.Fix("تعزيز") + "\nMACH" : "\u26A1 BOOST\nMACH";
-			string spdUpLabel = isRTL ? "\u25B2\n" + GeoGame.Localization.Arabic.ArabicFixer.Fix("دفع+") : "\u25B2\n+THRUST";
-			string spdDownLabel = isRTL ? "\u25BC\n" + GeoGame.Localization.Arabic.ArabicFixer.Fix("دفع-") : "\u25BC\n-THRUST";
+			string dropLabel = isRTL ? GeoGame.Localization.Arabic.ArabicFixer.Fix("إسقاط") : "DROP\nPAYLOAD";
+			string boostLabel = isRTL ? GeoGame.Localization.Arabic.ArabicFixer.Fix("تعزيز") : "BOOST\nMACH";
+			string spdUpLabel = isRTL ? GeoGame.Localization.Arabic.ArabicFixer.Fix("دفع +") : "THRUST\n(+)";
+			string spdDownLabel = isRTL ? GeoGame.Localization.Arabic.ArabicFixer.Fix("كبح -") : "BRAKE\n(-)";
 
-			// 1. DROP PACKAGE BUTTON (Cockpit payload release gold)
-			CreateActionButton(parent, "DropButton", new Vector2(-120, 130), new Vector2(110, 110), dropLabel,
+			// 1. DROP PACKAGE BUTTON (Cockpit payload release gold - 130x130)
+			CreateActionButton(parent, "DropButton", new Vector2(-125, 125), new Vector2(130, 130), dropLabel,
 				new Color(0.95f, 0.68f, 0.12f, 0.90f),
 				onDown: () => { dropPackageTriggered = true; });
 
-			// 2. BOOST BUTTON (Afterburner Mach cyan)
-			CreateActionButton(parent, "BoostButton", new Vector2(-250, 110), new Vector2(85, 85), boostLabel,
+			// 2. BOOST BUTTON (Afterburner Mach cyan - 110x110)
+			CreateActionButton(parent, "BoostButton", new Vector2(-270, 110), new Vector2(110, 110), boostLabel,
 				new Color(0.05f, 0.78f, 1.00f, 0.90f),
 				onDown: () => { IsBoosting = true; },
 				onUp: () => { IsBoosting = false; });
 
-			// 3. SPEED UP BUTTON (Airspeed increase emerald)
-			CreateActionButton(parent, "SpeedUpButton", new Vector2(-120, 270), new Vector2(75, 75), spdUpLabel,
+			// 3. SPEED UP BUTTON (Airspeed increase emerald - 95x95)
+			CreateActionButton(parent, "SpeedUpButton", new Vector2(-125, 280), new Vector2(95, 95), spdUpLabel,
 				new Color(0.12f, 0.85f, 0.50f, 0.85f),
 				onDown: () => { SpeedInput = 1f; },
 				onUp: () => { SpeedInput = 0f; });
 
-			// 4. SPEED DOWN BUTTON (Airspeed decrease amber)
-			CreateActionButton(parent, "SpeedDownButton", new Vector2(-220, 220), new Vector2(75, 75), spdDownLabel,
+			// 4. SPEED DOWN BUTTON (Airspeed decrease amber - 95x95)
+			CreateActionButton(parent, "SpeedDownButton", new Vector2(-245, 235), new Vector2(95, 95), spdDownLabel,
 				new Color(0.92f, 0.35f, 0.25f, 0.85f),
 				onDown: () => { SpeedInput = -1f; },
 				onUp: () => { SpeedInput = 0f; });
@@ -371,23 +397,24 @@ namespace GeoGame.InputMobile
 		private void CreateTopBar(Transform parent)
 		{
 			bool isRTL = GeoGame.Localization.LocalizationManager.IsRightToLeftWritingSystem;
-			string mapLabel = isRTL ? GeoGame.Localization.Arabic.ArabicFixer.Fix("خريطة") + "\n\uD83C\uDF0D NAV" : "NAV\n\uD83C\uDF0D";
-			string camLabel = isRTL ? GeoGame.Localization.Arabic.ArabicFixer.Fix("كاميرا") + "\n\uD83D\uDCF7 HUD" : "HUD\n\uD83D\uDCF7";
+			string mapLabel = isRTL ? GeoGame.Localization.Arabic.ArabicFixer.Fix("خريطة") : "NAV\nMAP";
+			string camLabel = isRTL ? GeoGame.Localization.Arabic.ArabicFixer.Fix("كاميرا") : "CAM\nVIEW";
+			string pauseLabel = isRTL ? GeoGame.Localization.Arabic.ArabicFixer.Fix("إيقاف") : "PAUSE\nSYS";
 
-			// Top-Left: Pause / Systems Button (⏸ SYS)
-			CreateActionButton(parent, "PauseButton", new Vector2(70, -60), new Vector2(70, 70), "\u2759\u2759\nSYS",
+			// Top-Left: Pause / Systems Button (85x85)
+			CreateActionButton(parent, "PauseButton", new Vector2(75, -65), new Vector2(85, 85), pauseLabel,
 				new Color(0.12f, 0.18f, 0.26f, 0.85f),
 				onDown: () => { togglePauseTriggered = true; },
 				anchorMin: new Vector2(0, 1), anchorMax: new Vector2(0, 1));
 
-			// Top-Right: Map Button (🗺)
-			CreateActionButton(parent, "MapButton", new Vector2(-70, -60), new Vector2(70, 70), mapLabel,
+			// Top-Right: Map Button (85x85)
+			CreateActionButton(parent, "MapButton", new Vector2(-75, -65), new Vector2(85, 85), mapLabel,
 				new Color(0.2f, 0.5f, 0.85f, 0.85f),
 				onDown: () => { toggleMapTriggered = true; },
 				anchorMin: new Vector2(1, 1), anchorMax: new Vector2(1, 1));
 
-			// Top-Right: Camera View Button (📷)
-			CreateActionButton(parent, "CamButton", new Vector2(-160, -60), new Vector2(70, 70), camLabel,
+			// Top-Right: Camera View Button (85x85)
+			CreateActionButton(parent, "CamButton", new Vector2(-175, -65), new Vector2(85, 85), camLabel,
 				new Color(0.3f, 0.35f, 0.4f, 0.8f),
 				onDown: () => { cycleCameraTriggered = true; },
 				anchorMin: new Vector2(1, 1), anchorMax: new Vector2(1, 1));
@@ -396,10 +423,10 @@ namespace GeoGame.InputMobile
 		private void CreateMapControls(Transform parent)
 		{
 			bool isRTL = GeoGame.Localization.LocalizationManager.IsRightToLeftWritingSystem;
-			string backFlightLabel = isRTL ? "\u2716 " + GeoGame.Localization.Arabic.ArabicFixer.Fix("العودة للطيران") : "\u2716 BACK TO FLIGHT";
+			string backFlightLabel = isRTL ? GeoGame.Localization.Arabic.ArabicFixer.Fix("العودة للطيران") : "RETURN TO FLIGHT";
 
-			// "CLOSE MAP / RETURN TO FLIGHT" button in top-center
-			CreateActionButton(parent, "CloseMapButton", new Vector2(0, -65), new Vector2(230, 60), backFlightLabel,
+			// "CLOSE MAP / RETURN TO FLIGHT" button in top-center (280x68)
+			CreateActionButton(parent, "CloseMapButton", new Vector2(0, -65), new Vector2(280, 68), backFlightLabel,
 				new Color(0.85f, 0.25f, 0.25f, 0.9f),
 				onDown: () => { toggleMapTriggered = true; },
 				anchorMin: new Vector2(0.5f, 1), anchorMax: new Vector2(0.5f, 1));
@@ -446,14 +473,19 @@ namespace GeoGame.InputMobile
 			img.sprite = circleSprite;
 			img.color = color;
 
-			// Label using TextMeshProUGUI for proper Arabic font fallback and crisp SDF rendering
+			// Label using TextMeshProUGUI with gaming font and crisp rendering
 			GameObject labelObj = new GameObject("Label", typeof(RectTransform), typeof(TMPro.TextMeshProUGUI));
 			labelObj.transform.SetParent(btnObj.transform, false);
 			StretchFull(labelObj.GetComponent<RectTransform>());
 
 			TMPro.TextMeshProUGUI txt = labelObj.GetComponent<TMPro.TextMeshProUGUI>();
+			if (GeoGame.Localization.Arabic.ArabicFontManager.ArabicFontAsset != null && GeoGame.Localization.LocalizationManager.IsRightToLeftWritingSystem)
+			{
+				txt.font = GeoGame.Localization.Arabic.ArabicFontManager.ArabicFontAsset;
+			}
 			txt.text = labelText;
-			txt.fontSize = Mathf.Min(size.x, size.y) * 0.28f;
+			txt.fontSize = Mathf.Min(size.x, size.y) * 0.25f;
+			txt.fontStyle = TMPro.FontStyles.Bold;
 			txt.alignment = TMPro.TextAlignmentOptions.Center;
 			txt.color = Color.white;
 			txt.raycastTarget = false;

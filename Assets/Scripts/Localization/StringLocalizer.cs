@@ -19,11 +19,25 @@ namespace GeoGame.Localization
 			LocalizationManager.onLanguageChanged += Localize;
 		}
 
+		private TMPro.TMP_FontAsset originalFont;
+
 		void Localize()
 		{
+			if (textElement == null) return;
+			if (originalFont == null) originalFont = textElement.font;
+
 			currentValue = LocalizationManager.Localize(id);
 			textElement.text = currentValue;
 			textElement.isRightToLeftText = false;
+
+			if (LocalizationManager.IsRightToLeftWritingSystem && Arabic.ArabicFontManager.ArabicFontAsset != null)
+			{
+				textElement.font = Arabic.ArabicFontManager.ArabicFontAsset;
+			}
+			else if (originalFont != null)
+			{
+				textElement.font = originalFont;
+			}
 
 			if (controlRectTransformWidth)
 			{

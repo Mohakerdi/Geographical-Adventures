@@ -1,9 +1,15 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using TMPro;
 
 namespace GeoGame.Localization.Arabic
 {
+	/// <summary>
+	/// Manages the game-wide Arabic gaming font (Cairo-Bold), ensuring all Arabic
+	/// text across menus, HUD, country tooltips, and dialogs renders with crisp
+	/// neo-grotesque gaming typography.
+	/// </summary>
 	public static class ArabicFontManager
 	{
 		private static TMP_FontAsset arabicFontAsset;
@@ -12,39 +18,64 @@ namespace GeoGame.Localization.Arabic
 		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
 		public static void Initialize()
 		{
-			if (initialized) return;
+			if (initialized && arabicFontAsset != null) return;
 
-			Font ttf = Resources.Load<Font>("Fonts/NotoSansArabic-Bold");
+			Font ttf = Resources.Load<Font>("Fonts/Cairo-Bold");
+			if (ttf == null) ttf = Resources.Load<Font>("Fonts/Cairo-Black");
+			if (ttf == null) ttf = Resources.Load<Font>("Fonts/NotoSansArabic-Bold");
+
 			if (ttf == null)
 			{
-				Debug.LogWarning("ArabicFontManager: Could not load Fonts/NotoSansArabic-Bold from Resources.");
+				Debug.LogWarning("ArabicFontManager: Could not load Cairo or Arabic font from Resources.");
 				return;
 			}
 
-			// Create dynamic TMP font asset with multi-character support
-			arabicFontAsset = TMP_FontAsset.CreateFontAsset(ttf, 36, 4, UnityEngine.TextCore.LowLevel.GlyphRenderMode.SDFAA, 512, 512);
+			// Create dynamic TMP font asset with gaming-oriented SDFAA rendering
+			arabicFontAsset = TMP_FontAsset.CreateFontAsset(ttf, 44, 5, UnityEngine.TextCore.LowLevel.GlyphRenderMode.SDFAA, 1024, 1024);
 			if (arabicFontAsset != null)
 			{
-				arabicFontAsset.name = "NotoSansArabic-Bold SDF Dynamic";
+				arabicFontAsset.name = "Cairo-Bold SDF Dynamic";
 
-				// Register in TMP Settings default font fallback
-				if (TMP_Settings.defaultFontAsset != null)
-				{
-					AddToFallback(TMP_Settings.defaultFontAsset, arabicFontAsset);
-				}
+				RegisterFallbacks();
 
-				// Also check all loaded font assets
-				TMP_FontAsset[] allFonts = Resources.FindObjectsOfTypeAll<TMP_FontAsset>();
-				foreach (var f in allFonts)
+				SceneManager.sceneLoaded += (scene, mode) =>
 				{
-					if (f != arabicFontAsset)
+					RegisterFallbacks();
+					if (LocalizationManager.IsRightToLeftWritingSystem)
 					{
-						AddToFallback(f, arabicFontAsset);
+						ApplyFontToAllActiveText();
 					}
-				}
+				};
+
+				LocalizationManager.onLanguageChanged += () =>
+				{
+					if (LocalizationManager.IsRightToLeftWritingSystem)
+					{
+						ApplyFontToAllActiveText();
+					}
+				};
 
 				initialized = true;
-				Debug.Log("ArabicFontManager: Successfully initialized Arabic dynamic font asset as TMP fallback.");
+				Debug.Log("ArabicFontManager: Successfully initialized Cairo gaming font asset as TMP fallback.");
+			}
+		}
+
+		public static void RegisterFallbacks()
+		{
+			if (arabicFontAsset == null) return;
+
+			if (TMP_Settings.defaultFontAsset != null)
+			{
+				AddToFallback(TMP_Settings.defaultFontAsset, arabicFontAsset);
+			}
+
+			TMP_FontAsset[] allFonts = Resources.FindObjectsOfTypeAll<TMP_FontAsset>();
+			foreach (var f in allFonts)
+			{
+				if (f != arabicFontAsset)
+				{
+					AddToFallback(f, arabicFontAsset);
+				}
 			}
 		}
 
@@ -55,9 +86,20 @@ namespace GeoGame.Localization.Arabic
 			{
 				target.fallbackFontAssetTable = new List<TMP_FontAsset>();
 			}
-			if (!target.fallbackFontAssetTable.Contains(fallback))
+			target.fallbackFontAssetTable.Remove(fallback);
+			target.fallbackFontAssetTable.Insert(0, fallback);
+		}
+
+		public static void ApplyFontToAllActiveText()
+		{
+			if (arabicFontAsset == null) return;
+			TMP_Text[] texts = Object.FindObjectsOfType<TMP_Text>(includeInactive: true);
+			foreach (var txt in texts)
 			{
-				target.fallbackFontAssetTable.Add(fallback);
+				if (txt != null && (LocalizationManager.IsRightToLeftWritingSystem || ArabicFixer.ContainsArabic(txt.text)))
+				{
+					txt.font = arabicFontAsset;
+				}
 			}
 		}
 

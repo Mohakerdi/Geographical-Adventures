@@ -198,58 +198,14 @@ namespace GeoGame.UI
 			if (tmp != null)
 			{
 				tmp.color = Color.white;
-				string cur = tmp.text.Trim();
-
-				// Add sleek flight iconography if not already decorated
-				if (!cur.Contains("✈") && !cur.Contains("⚙") && !cur.Contains("📊") && !cur.Contains("★") && !cur.Contains("⏻") && !cur.Contains("▶") && !cur.Contains("✔") && !cur.Contains("✖") && !cur.Contains("🖥") && !cur.Contains("🔊") && !cur.Contains("🎮"))
+				string cur = tmp.text;
+				// Strip any emoji glyphs that may corrupt rendering on standard TMP fonts
+				string cleaned = cur.Replace("✈", "").Replace("⚙", "").Replace("📊", "").Replace("★", "")
+				                    .Replace("⏻", "").Replace("▶", "").Replace("✔", "").Replace("✖", "")
+				                    .Replace("🖥", "").Replace("🔊", "").Replace("🎮", "").Trim();
+				if (cleaned != cur)
 				{
-					string lower = cur.ToLowerInvariant();
-					bool isRTL = GeoGame.Localization.LocalizationManager.IsRightToLeftWritingSystem;
-
-					if (lower.Contains("play") || lower.Contains("طيران") || lower.Contains("ابدأ"))
-					{
-						tmp.text = isRTL ? cur + " ✈" : "✈  " + cur;
-					}
-					else if (lower.Contains("resume") || lower.Contains("مواصلة"))
-					{
-						tmp.text = isRTL ? cur + " ▶" : "▶  " + cur;
-					}
-					else if (lower.Contains("settings") || lower.Contains("إعدادات"))
-					{
-						tmp.text = isRTL ? cur + " ⚙" : "⚙  " + cur;
-					}
-					else if (lower.Contains("stats") || lower.Contains("إحصائيات") || lower.Contains("سجل"))
-					{
-						tmp.text = isRTL ? cur + " 📊" : "📊  " + cur;
-					}
-					else if (lower.Contains("credits") || lower.Contains("طاقم") || lower.Contains("شكر"))
-					{
-						tmp.text = isRTL ? cur + " ★" : "★  " + cur;
-					}
-					else if (lower.Contains("quit") || lower.Contains("exit") || lower.Contains("خروج"))
-					{
-						tmp.text = isRTL ? cur + " ⏻" : "⏻  " + cur;
-					}
-					else if (lower.Contains("apply") || lower.Contains("تطبيق"))
-					{
-						tmp.text = isRTL ? cur + " ✔" : "✔  " + cur;
-					}
-					else if (lower.Contains("close") || lower.Contains("إغلاق") || lower.Contains("عودة"))
-					{
-						tmp.text = isRTL ? cur + " ✖" : "✖  " + cur;
-					}
-					else if (lower.Contains("graphics") || lower.Contains("رسوم"))
-					{
-						tmp.text = isRTL ? cur + " 🖥" : "🖥  " + cur;
-					}
-					else if (lower.Contains("audio") || lower.Contains("صوت"))
-					{
-						tmp.text = isRTL ? cur + " 🔊" : "🔊  " + cur;
-					}
-					else if (lower.Contains("controls") || lower.Contains("تحكم"))
-					{
-						tmp.text = isRTL ? cur + " 🎮" : "🎮  " + cur;
-					}
+					tmp.text = cleaned;
 				}
 				return;
 			}

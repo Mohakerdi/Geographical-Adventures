@@ -97,6 +97,11 @@ jobs:
     permissions:
       contents: write
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
       - name: Create release directory
         run: mkdir -p release-assets
 
@@ -114,26 +119,51 @@ jobs:
           name: Geographical-Adventures-Android-APK
           path: release-assets
 
-      - name: List Release Files
-        run: ls -la release-assets
+      - name: Prepare Release Assets
+        run: |
+          find release-assets -type f -name "*.apk" -exec mv -f {} release-assets/ \;
+          find release-assets -type f -name "*.zip" -exec mv -f {} release-assets/ \;
+          find release-assets -mindepth 1 -type d -exec rm -rf {} + || true
+          ls -la release-assets
 
-      - name: Create or Update GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'latest' }}
-          name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'Geographical Adventures - Latest Build' }}
-          body: |
-            ### Geographical Adventures - Automatic Build
-            Downloadable standalone builds for Linux and Android:
-            - **Linux (Fedora / Ubuntu / x86_64)**: Download `Geographical-Adventures-Linux-Fedora.zip`, unzip and run `./Geographical Adventures.x86_64`.
-            - **Android APK**: Download and install `Geographical-Adventures.apk` directly on your Android phone or tablet.
+      - name: Update git tag latest
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -f latest ${{ github.sha }}
+          git push -f origin latest
 
-            **Features in this release:**
-            - **New Syrian Flag**: Updated to the green-white-black flag with three red stars.
-            - **Full Arabic Language Localization**: Menus, manual, credits, in-game stats, quest delivery feedback, and interactive globe country tooltips.
-            - **Mobile Touch Controls**: Floating steering joystick, DROP, BOOST, throttle buttons, and top navigation bar.
-          draft: false
-          prerelease: false
-          files: release-assets/*
+      - name: Create or Update GitHub Releases
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cat << 'EOF' > release_notes.md
+          ### Geographical Adventures - Automatic Build
+          Downloadable standalone builds for Linux and Android:
+          - **Android APK**: Download and install `Geographical-Adventures.apk` directly on your Android phone or tablet.
+          - **Linux (Fedora / Ubuntu / x86_64)**: Download `Geographical-Adventures-Linux-Fedora.zip`, unzip and run `./Geographical Adventures.x86_64`.
+
+          **Highlights & Features:**
+          - **Modern Arabic Typography (Cairo Font)**: Sleek, high-definition gaming font for all Arabic UI, quest notifications, and menus.
+          - **Enhanced Touch Controls & Button Opacity**: Larger mobile buttons, responsive virtual joystick, and customizable button opacity / transient level (20% to 100%) like eFootball Mobile / PES.
+          - **Clean Cockpit & HUD**: Polished flight-avionics UI without corrupted glyphs or missing icons.
+          - **Fixed Sun Shadows & High FPS**: Planet terminator shadow fixes and smooth 60+ FPS on Android.
+          - **Forced Landscape**: Native landscape lock for mobile devices.
+          EOF
+
+          BUILD_TAG="v0.1.${{ github.run_number }}"
+          echo "Publishing versioned release: $BUILD_TAG"
+          gh release create "$BUILD_TAG" release-assets/* \
+            --title "Geographical Adventures $BUILD_TAG" \
+            --notes-file release_notes.md || true
+
+          echo "Updating rolling latest release..."
+          if gh release view latest > /dev/null 2>&1; then
+            gh release edit latest --title "Geographical Adventures - Latest Build" --notes-file release_notes.md --latest
+            gh release upload latest release-assets/* --clobber
+          else
+            gh release create latest release-assets/* \
+              --title "Geographical Adventures - Latest Build" \
+              --notes-file release_notes.md \
+              --latest
+          fi

@@ -35,14 +35,7 @@ public class CustomButton : Button
 		base.OnPointerEnter(eventData);
 		if (changeTextOnMouseOver)
 		{
-			if (LocalizationManager.IsRightToLeftWritingSystem)
-			{
-				SetLabel($"[  {localizer.currentValue}  ✈ ]");
-			}
-			else
-			{
-				SetLabel($"[ ✈  {localizer.currentValue}  ]");
-			}
+			SetLabel($"[  {localizer.currentValue}  ]");
 		}
 		onPointerEnter?.Invoke();
 	}
