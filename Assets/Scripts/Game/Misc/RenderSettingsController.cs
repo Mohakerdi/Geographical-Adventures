@@ -42,15 +42,16 @@ public class RenderSettingsController : MonoBehaviour
 
 	public static void SetShadowQuality(Settings.ShadowQuality quality)
 	{
+		bool isMobile = Application.isMobilePlatform || SystemInfo.deviceType == DeviceType.Handheld;
 		switch (quality)
 		{
 			case Settings.ShadowQuality.High:
 				Instance.mainLight.shadows = LightShadows.Soft;
-				Instance.mainLight.shadowResolution = UnityEngine.Rendering.LightShadowResolution.VeryHigh;
+				Instance.mainLight.shadowResolution = isMobile ? UnityEngine.Rendering.LightShadowResolution.High : UnityEngine.Rendering.LightShadowResolution.VeryHigh;
 				break;
 			case Settings.ShadowQuality.Low:
-				Instance.mainLight.shadows = LightShadows.Soft;
-				Instance.mainLight.shadowResolution = UnityEngine.Rendering.LightShadowResolution.Medium;
+				Instance.mainLight.shadows = isMobile ? LightShadows.Hard : LightShadows.Soft;
+				Instance.mainLight.shadowResolution = isMobile ? UnityEngine.Rendering.LightShadowResolution.Low : UnityEngine.Rendering.LightShadowResolution.Medium;
 				break;
 			case Settings.ShadowQuality.Disabled:
 				Instance.mainLight.shadows = LightShadows.None;
@@ -83,7 +84,9 @@ public class RenderSettingsController : MonoBehaviour
 		{
 			LayerOverride layerOverride = layerOverrides[i];
 			cameraCullDstPerLayer[layerOverride.layer] = layerOverride.cameraCullDst;
-			lightCullDstPerLayer[layerOverride.layer] = layerOverride.shadowCullDst;
+			// Ensure shadow culling distance is at least as large as shadow draw distance to prevent cut shadows
+			float shadowCull = Mathf.Max(layerOverride.shadowCullDst, shadowDrawDistance);
+			lightCullDstPerLayer[layerOverride.layer] = shadowCull;
 		}
 
 		mainCamera.farClipPlane = maxCameraCullDst;
@@ -93,7 +96,8 @@ public class RenderSettingsController : MonoBehaviour
 
 	void ApplyShadowSettings()
 	{
-		QualitySettings.shadowResolution = shadowResolution;
+		bool isMobile = Application.isMobilePlatform || SystemInfo.deviceType == DeviceType.Handheld;
+		QualitySettings.shadowResolution = isMobile ? ShadowResolution.High : shadowResolution;
 		QualitySettings.shadowDistance = shadowDrawDistance;
 	}
 

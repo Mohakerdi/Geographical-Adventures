@@ -36,6 +36,17 @@ public class GameController : MonoBehaviour
 	{
 		stateStack = new Stack<GameState>();
 		stateStack.Push(startupState);
+
+		// Unlock high refresh rate on mobile (Android defaults to 30 fps unless targetFrameRate is explicitly set)
+		int refresh = (int)Screen.currentResolution.refreshRate;
+		Application.targetFrameRate = refresh >= 60 ? refresh : 60;
+		QualitySettings.vSyncCount = 0;
+
+		if (Application.isMobilePlatform || SystemInfo.deviceType == DeviceType.Handheld)
+		{
+			// 2x MSAA provides sharp edges while saving significant memory bandwidth over 4x on mobile GPUs
+			QualitySettings.antiAliasing = 2;
+		}
 	}
 
 	void Start()

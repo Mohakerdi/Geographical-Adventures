@@ -238,14 +238,20 @@ Shader "Custom/Ocean"
 				oceanCol = lerp(oceanCol, foam.rgb, foam.a);
 
 				// ---- Apply shadows ----
-				// First, a little fix to the shadow value. When sun is on far side of planet, the far chunks of the earth
-				// often don't get rendered for shadows due to culling distance. This means the ocean sometimes has chunks of
-				// shadow missing. So crude fix is to just force the shadow value to zero (shadows on) when sufficiently dark.
-				float nightT = saturate(dot(sphereNormal,-dirToSun)); // 0 at sunrise/sunset to 1 at midnight
-				float nightShadowFixT = smoothstep(0.2,0.3,nightT);
-				shadows = lerp(shadows, 0, smoothstep(0.2,0.3,nightT));
+				// 1. Natural planet occlusion: The spherical body of the Earth blocks the sun on the dark hemisphere
+				float sunHorizonDot = dot(sphereNormal, dirToSun);
+				float planetOcclusion = smoothstep(-0.02, 0.04, sunHorizonDot);
+
+				// 2. Smoothly fade dynamic shadows towards shadow boundary (115-148 units) to eliminate cut lines
+				float camDst = length(i.worldPos - _WorldSpaceCameraPos.xyz);
+				float shadowDistanceFade = smoothstep(148.0, 115.0, camDst);
+				shadows = lerp(1.0, shadows, shadowDistanceFade);
+
+				// 3. Force full shadow when occluded by the planet itself (eliminates missing/cut shadow chunks)
+				shadows = lerp(0.0, shadows, planetOcclusion);
+
 				// Apply the shadows to the ocean colour
-				oceanCol *= lerp(1, shadows, _ShadowStrength);
+				oceanCol *= lerp(1.0, shadows, _ShadowStrength);
 				// # Add ambient colour
 				oceanCol = saturate(oceanCol + _Ambient * 0.1);
 

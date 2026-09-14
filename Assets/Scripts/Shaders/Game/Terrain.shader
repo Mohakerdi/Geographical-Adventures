@@ -135,7 +135,19 @@ Shader "Custom/Terrain"
 				float lakeSpecular = calculateSpecular(waveA, viewDir, dirToSun, _Specular) * lakeMask;
 				//return lakeSpecular;
 				
+				// 1. Natural planet occlusion: The spherical body of the Earth blocks the sun on the dark hemisphere
+				float sunHorizonDot = dot(pointOnUnitSphere, dirToSun);
+				float planetOcclusion = smoothstep(-0.02, 0.04, sunHorizonDot);
+
+				// 2. Sample dynamic shadows and smoothly fade towards shadow distance boundary (115-148 units)
 				float shadows = LIGHT_ATTENUATION(i);
+				float camDst = length(i.worldPos - _WorldSpaceCameraPos.xyz);
+				float shadowDistanceFade = smoothstep(148.0, 115.0, camDst);
+				shadows = lerp(1.0, shadows, shadowDistanceFade);
+
+				// 3. Force full shadow when occluded by the planet itself (eliminates missing/cut shadow chunks on far side)
+				shadows = lerp(0.0, shadows, planetOcclusion);
+
 				float3 shadowCol = lerp(_ShadowEdgeCol, _ShadowInnerCol, saturate((1-shadows) * 1.5));
 				shadows = lerp(1, shadows, _ShadowStrength);
 				 
@@ -150,9 +162,9 @@ Shader "Custom/Terrain"
 				nightCol += fresnel * _FresnelCol;
 				float nightT = smoothstep(-0.25, 0.25, dot(pointOnUnitSphere, dirToSun));
 			
-				
 				// ---- Calculate day colour ----
 				float3 shading = saturate(saturate(dot(worldNormal, dirToSun) + _BrightnessAdd)) * _BrightnessMul;
+				shading *= planetOcclusion; // Prevent artificial light leakage on the dark hemisphere
 				float3 terrainCol = unlitTerrainCol * shading + lakeSpecular * 1;
 				// Apply shadows
 				terrainCol = lerp(terrainCol, shadowCol, 1-shadows);

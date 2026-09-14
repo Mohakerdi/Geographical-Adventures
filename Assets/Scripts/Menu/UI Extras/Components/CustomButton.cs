@@ -37,11 +37,11 @@ public class CustomButton : Button
 		{
 			if (LocalizationManager.IsRightToLeftWritingSystem)
 			{
-				SetLabel($">   {localizer.currentValue}   <");
+				SetLabel($"[  {localizer.currentValue}  ✈ ]");
 			}
 			else
 			{
-				SetLabel($"<   {localizer.currentValue}   >");
+				SetLabel($"[ ✈  {localizer.currentValue}  ]");
 			}
 		}
 		onPointerEnter?.Invoke();
