@@ -55,7 +55,7 @@ jobs:
           retention-days: 14
 
   buildAndroid:
-    name: Build for Android 16 ARM64 (.apk)
+    name: Build for Android Phone (.apk)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -81,12 +81,11 @@ jobs:
           unityVersion: 2021.3.2f1
           buildName: Geographical-Adventures
           androidExportType: androidPackage
-          customParameters: -androidTargetArchitectures ARM64
 
       - name: Upload Android APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Geographical-Adventures-Android16-ARM64-APK
+          name: Geographical-Adventures-Android-APK
           path: build/Android/**/*.apk
           retention-days: 14
 
@@ -156,7 +155,7 @@ jobs:
         if: needs.buildAndroid.result == 'success'
         uses: actions/download-artifact@v4
         with:
-          name: Geographical-Adventures-Android16-ARM64-APK
+          name: Geographical-Adventures-Android-APK
           path: release-assets
 
       - name: Download Windows Artifact
