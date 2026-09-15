@@ -51,6 +51,10 @@ public class SettingsMenu : Menu
 		SetUpScreen();
 		SetupMobileSettingsUI();
 		LocalizationManager.onLanguageChanged += UpdateMobileSettingsLabels;
+		if (tabGroup != null && tabGroup.tabs != null && tabGroup.tabs.Length > 2 && tabGroup.tabs[2].button != null)
+		{
+			tabGroup.tabs[2].button.onClick.AddListener(SetupMobileSettingsUI);
+		}
 	}
 
 	void OnDestroy()
@@ -475,12 +479,6 @@ public class SettingsMenu : Menu
 
 	void SetupMobileSettingsUI()
 	{
-		if (mobileSettingsCard != null)
-		{
-			UpdateMobileSettingsLabels();
-			return;
-		}
-
 		Transform controlsContainer = null;
 		if (tabGroup != null && tabGroup.tabs != null && tabGroup.tabs.Length > 2 && tabGroup.tabs[2].holder != null)
 		{
@@ -488,9 +486,30 @@ public class SettingsMenu : Menu
 		}
 		if (controlsContainer == null) return;
 
-		// Find ScrollRect content if present
+		bool isMobile = Application.isMobilePlatform || SystemInfo.deviceType == DeviceType.Handheld || (GeoGame.InputMobile.MobileControls.Instance != null && GeoGame.InputMobile.MobileControls.Instance.forceEnableInEditor);
+
 		ScrollRect scroll = controlsContainer.GetComponentInChildren<ScrollRect>(true);
-		Transform parent = (scroll != null && scroll.content != null) ? scroll.content : controlsContainer;
+
+		if (!isMobile)
+		{
+			// On PC / Desktop, show standard keyboard rebinding scroll view
+			if (scroll != null) scroll.gameObject.SetActive(true);
+			if (mobileSettingsCard != null) mobileSettingsCard.SetActive(false);
+			return;
+		}
+
+		// On Mobile / Android APK: Completely hide PC keyboard rebind controls
+		if (scroll != null)
+		{
+			scroll.gameObject.SetActive(false);
+		}
+
+		if (mobileSettingsCard != null)
+		{
+			mobileSettingsCard.SetActive(true);
+			UpdateMobileSettingsLabels();
+			return;
+		}
 
 		// Load current opacity setting
 		float currentOp = PlayerPrefs.GetFloat("MobileControls_Opacity", 0.80f);
@@ -504,17 +523,20 @@ public class SettingsMenu : Menu
 			}
 		}
 
-		// Create Card Container
+		// Create Dedicated Mobile Controls Container directly on the Controls Tab
 		mobileSettingsCard = new GameObject("MobileControlsSettingsCard", typeof(RectTransform), typeof(VerticalLayoutGroup));
-		mobileSettingsCard.transform.SetParent(parent, false);
-		mobileSettingsCard.transform.SetSiblingIndex(0); // Position at top of Controls tab
+		mobileSettingsCard.transform.SetParent(controlsContainer, false);
 
 		RectTransform cardRt = mobileSettingsCard.GetComponent<RectTransform>();
-		cardRt.sizeDelta = new Vector2(900, 110);
+		cardRt.anchorMin = Vector2.zero;
+		cardRt.anchorMax = Vector2.one;
+		cardRt.offsetMin = new Vector2(40, 20);
+		cardRt.offsetMax = new Vector2(-40, -20);
 
 		VerticalLayoutGroup vlg = mobileSettingsCard.GetComponent<VerticalLayoutGroup>();
-		vlg.padding = new RectOffset(20, 20, 10, 10);
-		vlg.spacing = 8;
+		vlg.padding = new RectOffset(20, 20, 15, 15);
+		vlg.spacing = 18;
+		vlg.childAlignment = TextAnchor.UpperCenter;
 		vlg.childControlWidth = true;
 		vlg.childControlHeight = false;
 		vlg.childForceExpandWidth = true;
@@ -524,30 +546,41 @@ public class SettingsMenu : Menu
 		GameObject headerGo = new GameObject("Header", typeof(RectTransform), typeof(TMP_Text));
 		headerGo.transform.SetParent(mobileSettingsCard.transform, false);
 		RectTransform hRt = headerGo.GetComponent<RectTransform>();
-		hRt.sizeDelta = new Vector2(0, 32);
+		hRt.sizeDelta = new Vector2(0, 40);
 		TMP_Text hTxt = headerGo.GetComponent<TMP_Text>();
-		hTxt.fontSize = 24;
+		hTxt.fontSize = 28;
 		hTxt.fontStyle = FontStyles.Bold;
-		hTxt.color = new Color(0f, 0.85f, 1f, 1f); // Neon Cyan HUD
+		hTxt.color = new Color(0f, 0.90f, 1f, 1f); // Neon Cyan HUD
 		hTxt.alignment = TextAlignmentOptions.Center;
 
-		// 2. Opacity / Transient Level Row
+		// 2. Subheader
+		GameObject subheaderGo = new GameObject("Subheader", typeof(RectTransform), typeof(TMP_Text));
+		subheaderGo.transform.SetParent(mobileSettingsCard.transform, false);
+		RectTransform subRt = subheaderGo.GetComponent<RectTransform>();
+		subRt.sizeDelta = new Vector2(0, 30);
+		TMP_Text subTxt = subheaderGo.GetComponent<TMP_Text>();
+		subTxt.fontSize = 18;
+		subTxt.color = new Color(0.85f, 0.90f, 0.95f, 0.9f);
+		subTxt.alignment = TextAlignmentOptions.Center;
+
+		// 3. Opacity / Transient Level Row
 		GameObject rowGo = new GameObject("OpacityRow", typeof(RectTransform), typeof(HorizontalLayoutGroup));
 		rowGo.transform.SetParent(mobileSettingsCard.transform, false);
 		RectTransform rowRt = rowGo.GetComponent<RectTransform>();
-		rowRt.sizeDelta = new Vector2(0, 58);
+		rowRt.sizeDelta = new Vector2(0, 60);
 		HorizontalLayoutGroup rowHlg = rowGo.GetComponent<HorizontalLayoutGroup>();
 		rowHlg.childControlWidth = false;
 		rowHlg.childControlHeight = true;
 		rowHlg.childForceExpandWidth = false;
 		rowHlg.childForceExpandHeight = true;
-		rowHlg.spacing = 20;
+		rowHlg.childAlignment = TextAnchor.MiddleCenter;
+		rowHlg.spacing = 25;
 
 		// Row Title Label
 		GameObject titleGo = new GameObject("Title", typeof(RectTransform), typeof(TMP_Text));
 		titleGo.transform.SetParent(rowGo.transform, false);
 		RectTransform titleRt = titleGo.GetComponent<RectTransform>();
-		titleRt.sizeDelta = new Vector2(400, 50);
+		titleRt.sizeDelta = new Vector2(420, 50);
 		TMP_Text titleTxt = titleGo.GetComponent<TMP_Text>();
 		titleTxt.fontSize = 22;
 		titleTxt.color = Color.white;
@@ -557,18 +590,19 @@ public class SettingsMenu : Menu
 		GameObject stepperGo = new GameObject("Stepper", typeof(RectTransform), typeof(HorizontalLayoutGroup));
 		stepperGo.transform.SetParent(rowGo.transform, false);
 		RectTransform stepperRt = stepperGo.GetComponent<RectTransform>();
-		stepperRt.sizeDelta = new Vector2(260, 50);
+		stepperRt.sizeDelta = new Vector2(280, 50);
 		HorizontalLayoutGroup stepHlg = stepperGo.GetComponent<HorizontalLayoutGroup>();
 		stepHlg.childControlWidth = false;
 		stepHlg.childControlHeight = true;
 		stepHlg.childForceExpandWidth = false;
 		stepHlg.childForceExpandHeight = true;
+		stepHlg.childAlignment = TextAnchor.MiddleCenter;
 		stepHlg.spacing = 10;
 
 		// Left Button [<]
 		GameObject btnLeftGo = new GameObject("BtnDecrease", typeof(RectTransform), typeof(Image), typeof(Button));
 		btnLeftGo.transform.SetParent(stepperGo.transform, false);
-		btnLeftGo.GetComponent<RectTransform>().sizeDelta = new Vector2(50, 50);
+		btnLeftGo.GetComponent<RectTransform>().sizeDelta = new Vector2(54, 50);
 		btnLeftGo.GetComponent<Image>().sprite = GeoGame.UI.FlightUITheme.ButtonNormalSprite;
 		btnLeftGo.GetComponent<Image>().type = Image.Type.Sliced;
 		Button btnLeft = btnLeftGo.GetComponent<Button>();
@@ -585,7 +619,7 @@ public class SettingsMenu : Menu
 		// Value Box [ 80% ]
 		GameObject valBoxGo = new GameObject("ValBox", typeof(RectTransform), typeof(Image));
 		valBoxGo.transform.SetParent(stepperGo.transform, false);
-		valBoxGo.GetComponent<RectTransform>().sizeDelta = new Vector2(130, 50);
+		valBoxGo.GetComponent<RectTransform>().sizeDelta = new Vector2(140, 50);
 		valBoxGo.GetComponent<Image>().sprite = GeoGame.UI.FlightUITheme.ButtonNormalSprite;
 		valBoxGo.GetComponent<Image>().type = Image.Type.Sliced;
 		valBoxGo.GetComponent<Image>().color = new Color(0.12f, 0.18f, 0.25f, 0.85f);
@@ -602,7 +636,7 @@ public class SettingsMenu : Menu
 		// Right Button [>]
 		GameObject btnRightGo = new GameObject("BtnIncrease", typeof(RectTransform), typeof(Image), typeof(Button));
 		btnRightGo.transform.SetParent(stepperGo.transform, false);
-		btnRightGo.GetComponent<RectTransform>().sizeDelta = new Vector2(50, 50);
+		btnRightGo.GetComponent<RectTransform>().sizeDelta = new Vector2(54, 50);
 		btnRightGo.GetComponent<Image>().sprite = GeoGame.UI.FlightUITheme.ButtonNormalSprite;
 		btnRightGo.GetComponent<Image>().type = Image.Type.Sliced;
 		Button btnRight = btnRightGo.GetComponent<Button>();
@@ -634,6 +668,16 @@ public class SettingsMenu : Menu
 			}
 		});
 
+		// 4. Controls Information & Layout Card
+		GameObject guideGo = new GameObject("GuideBox", typeof(RectTransform), typeof(TMP_Text));
+		guideGo.transform.SetParent(mobileSettingsCard.transform, false);
+		RectTransform guideRt = guideGo.GetComponent<RectTransform>();
+		guideRt.sizeDelta = new Vector2(0, 110);
+		TMP_Text guideTxt = guideGo.GetComponent<TMP_Text>();
+		guideTxt.fontSize = 17;
+		guideTxt.color = new Color(0.70f, 0.85f, 1.0f, 0.90f);
+		guideTxt.alignment = TextAlignmentOptions.Center;
+
 		UpdateMobileSettingsLabels();
 	}
 
@@ -659,25 +703,36 @@ public class SettingsMenu : Menu
 	{
 		if (mobileSettingsCard == null) return;
 		bool isRTL = GeoGame.Localization.LocalizationManager.IsRightToLeftWritingSystem;
+		var fontAsset = GeoGame.Localization.Arabic.ArabicFontManager.ArabicFontAsset;
 
 		TMP_Text hTxt = mobileSettingsCard.transform.Find("Header")?.GetComponent<TMP_Text>();
 		if (hTxt != null)
 		{
-			if (isRTL && GeoGame.Localization.Arabic.ArabicFontManager.ArabicFontAsset != null)
-			{
-				hTxt.font = GeoGame.Localization.Arabic.ArabicFontManager.ArabicFontAsset;
-			}
+			if (isRTL && fontAsset != null) hTxt.font = fontAsset;
 			hTxt.text = isRTL ? GeoGame.Localization.Arabic.ArabicFixer.Fix("أزرار التحكم باللمس (موبايل)") : "MOBILE TOUCH CONTROLS";
+		}
+
+		TMP_Text subTxt = mobileSettingsCard.transform.Find("Subheader")?.GetComponent<TMP_Text>();
+		if (subTxt != null)
+		{
+			if (isRTL && fontAsset != null) subTxt.font = fontAsset;
+			subTxt.text = isRTL ? GeoGame.Localization.Arabic.ArabicFixer.Fix("شاشة التحكم باللمس وعصا التوجيه الافتراضية") : "On-Screen Flight HUD & Virtual Joystick";
 		}
 
 		TMP_Text titleTxt = mobileSettingsCard.transform.Find("OpacityRow/Title")?.GetComponent<TMP_Text>();
 		if (titleTxt != null)
 		{
-			if (isRTL && GeoGame.Localization.Arabic.ArabicFontManager.ArabicFontAsset != null)
-			{
-				titleTxt.font = GeoGame.Localization.Arabic.ArabicFontManager.ArabicFontAsset;
-			}
+			if (isRTL && fontAsset != null) titleTxt.font = fontAsset;
 			titleTxt.text = isRTL ? GeoGame.Localization.Arabic.ArabicFixer.Fix("شفافية الأزرار (Transient Level)") : "Button Opacity (Transient Level)";
+		}
+
+		TMP_Text guideTxt = mobileSettingsCard.transform.Find("GuideBox")?.GetComponent<TMP_Text>();
+		if (guideTxt != null)
+		{
+			if (isRTL && fontAsset != null) guideTxt.font = fontAsset;
+			guideTxt.text = isRTL
+				? GeoGame.Localization.Arabic.ArabicFixer.Fix("• عصا توجيه ديناميكية: اسحب إصبعك في أي مكان على يسار الشاشة للتوجيه\n• أزرار الطيران: السرعة والتعزيز وإسقاط الصناديق على يمين الشاشة\n• شريط المهام: تبديل الكاميرا وخريطة العالم ثلاثية الأبعاد")
+				: "• Dynamic Steering: Touch & drag anywhere on left screen to steer\n• Flight Actions: Throttle, Boost, and Package Drop on right screen\n• Nav Bar: Cockpit Camera toggle, 3D Globe Map, and Systems Menu";
 		}
 
 		if (mobileOpacityValueText != null)

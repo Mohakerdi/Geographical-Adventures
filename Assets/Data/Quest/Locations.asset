@@ -646,15 +646,15 @@ MonoBehaviour:
     - cityName: Douglas
       overrideCountryName: 
       overrideCountryFlagCode: 
-  - countryName: Israel
+  - countryName: Palestine
     countryCode3: ISR
     curatedCities:
     - cityName: Jerusalem
       overrideCountryName: 
-      overrideCountryFlagCode: 
+      overrideCountryFlagCode: ps
     - cityName: Tel Aviv-Yafo
       overrideCountryName: 
-      overrideCountryFlagCode: 
+      overrideCountryFlagCode: ps
   - countryName: Italy
     countryCode3: ITA
     curatedCities:

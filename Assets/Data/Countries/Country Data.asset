@@ -145375,13 +145375,13 @@ MonoBehaviour:
             latitude: 1.1559056
           - longitude: -0.26927754
             latitude: 1.1558409
-  - name: Israel
-    name_long: Israel
-    name_sort: Israel
-    nameOfficial: Israel
-    abbreviation: Isr.
+  - name: Palestine
+    name_long: Palestine
+    name_sort: Palestine
+    nameOfficial: State of Palestine
+    abbreviation: Pal.
     continent: Asia
-    alpha2Code: IL
+    alpha2Code: PS
     alpha3Code: ISR
     population: 8299706
     cities:
@@ -145391,7 +145391,7 @@ MonoBehaviour:
       coordinate:
         longitude: 0.61447155
         latitude: 0.55463785
-      countryName: Israel
+      countryName: Palestine
       countryAlpha3Code: ISR
       inAmericanState: 0
       americanStateName: 
@@ -145401,7 +145401,7 @@ MonoBehaviour:
       coordinate:
         longitude: 0.60681725
         latitude: 0.5599354
-      countryName: Israel
+      countryName: Palestine
       countryAlpha3Code: ISR
       inAmericanState: 0
       americanStateName: 
@@ -145411,7 +145411,7 @@ MonoBehaviour:
       coordinate:
         longitude: 0.6104827
         latitude: 0.5728582
-      countryName: Israel
+      countryName: Palestine
       countryAlpha3Code: ISR
       inAmericanState: 0
       americanStateName: 
@@ -145421,7 +145421,7 @@ MonoBehaviour:
       coordinate:
         longitude: 0.60789835
         latitude: 0.5454157
-      countryName: Israel
+      countryName: Palestine
       countryAlpha3Code: ISR
       inAmericanState: 0
       americanStateName: 
@@ -145431,7 +145431,7 @@ MonoBehaviour:
       coordinate:
         longitude: 0.6160228
         latitude: 0.5707922
-      countryName: Israel
+      countryName: Palestine
       countryAlpha3Code: ISR
       inAmericanState: 0
       americanStateName: 
@@ -145441,7 +145441,7 @@ MonoBehaviour:
       coordinate:
         longitude: 0.60853875
         latitude: 0.5570515
-      countryName: Israel
+      countryName: Palestine
       countryAlpha3Code: ISR
       inAmericanState: 0
       americanStateName: 

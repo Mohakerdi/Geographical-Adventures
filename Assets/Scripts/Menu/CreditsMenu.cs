@@ -45,7 +45,9 @@ public class CreditsMenu : Menu
 
 		if (isRTL)
 		{
-			AddText(SetColour(ArabicFixer.Fix("تم التطوير بواسطة سيباستيان لاغي (Sebastian Lague)."), Color.white));
+			AddText(SetColour(ArabicFixer.Fix("تم التطوير الأصلي بواسطة سيباستيان لاغي (Sebastian Lague)."), Color.white));
+			AddLineBreak();
+			AddText(SetColour(ArabicFixer.Fix("التطوير والتحسينات، ودعم الأجهزة المحمولة، والتعريب بواسطة محمد كردي (Mohammad Kerdi)."), new Color(0.15f, 0.95f, 1.0f)));
 			AddLineBreak();
 			AddText(ArabicFixer.Fix("إذا كنت مهتماً بكيفية صنع هذه اللعبة، يمكنك العثور على سلسلة فيديوهات حول تطويرها على "));
 			AddText(CreateHyperlink("YouTube", youtubeVideoLink));
@@ -73,7 +75,9 @@ public class CreditsMenu : Menu
 		}
 		else
 		{
-			AddText(SetColour("Created by Sebastian Lague.", Color.white));
+			AddText(SetColour("Original Game Created by Sebastian Lague.", Color.white));
+			AddLineBreak();
+			AddText(SetColour("Enhanced, Mobile & Multiplatform Port by Mohammad Kerdi.", new Color(0.15f, 0.95f, 1.0f)));
 			AddLineBreak();
 			AddText("If you're interested in how the game was made, you can find a series of videos about its development on ");
 			AddText(CreateHyperlink("YouTube", youtubeVideoLink));

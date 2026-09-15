@@ -96,6 +96,10 @@ public class Locations : ScriptableObject
 		// ---- Local functions ----
 		Texture2D FindFlag(string code2)
 		{
+			if (!string.IsNullOrEmpty(code2) && code2.ToLower() == "il")
+			{
+				code2 = "ps";
+			}
 			for (int i = 0; i < flags.Length; i++)
 			{
 				if (flags[i].name.ToLower() == code2.ToLower())

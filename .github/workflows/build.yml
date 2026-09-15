@@ -1,4 +1,4 @@
-name: Build Game (Android & Linux Fedora)
+name: Build Game (Android, Linux & Windows)
 
 on:
   push:
@@ -89,10 +89,49 @@ jobs:
           path: build/Android/**/*.apk
           retention-days: 14
 
+  buildWindows:
+    name: Build for Windows (x86_64)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Cache Library
+        uses: actions/cache@v4
+        with:
+          path: Library
+          key: Library-Windows-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
+          restore-keys: |
+            Library-Windows-
+            Library-
+
+      - name: Build StandaloneWindows64
+        uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          targetPlatform: StandaloneWindows64
+          unityVersion: 2021.3.2f1
+          buildName: Geographical Adventures
+
+      - name: Package Windows build
+        run: |
+          cd build/StandaloneWindows64
+          zip -r ../../Geographical-Adventures-Windows-x64.zip .
+
+      - name: Upload Windows Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Geographical-Adventures-Windows-x64
+          path: Geographical-Adventures-Windows-x64.zip
+          retention-days: 14
+
   release:
     name: Publish GitHub Release
-    needs: [buildLinux, buildAndroid]
-    if: always() && (needs.buildLinux.result == 'success' || needs.buildAndroid.result == 'success')
+    needs: [buildLinux, buildAndroid, buildWindows]
+    if: always() && (needs.buildLinux.result == 'success' || needs.buildAndroid.result == 'success' || needs.buildWindows.result == 'success')
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -119,6 +158,13 @@ jobs:
           name: Geographical-Adventures-Android-APK
           path: release-assets
 
+      - name: Download Windows Artifact
+        if: needs.buildWindows.result == 'success'
+        uses: actions/download-artifact@v4
+        with:
+          name: Geographical-Adventures-Windows-x64
+          path: release-assets
+
       - name: Prepare Release Assets
         run: |
           find release-assets -type f -name "*.apk" -exec mv -f {} release-assets/ \;
@@ -138,17 +184,19 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           cat << 'EOF' > release_notes.md
-          ### Geographical Adventures - Automatic Build
-          Downloadable standalone builds for Linux and Android:
+          ### Geographical Adventures - Latest Builds
+          Downloadable standalone builds for Android, Windows, and Linux:
           - **Android APK**: Download and install `Geographical-Adventures.apk` directly on your Android phone or tablet.
+          - **Windows (64-bit)**: Download `Geographical-Adventures-Windows-x64.zip`, unzip and launch `Geographical Adventures.exe`.
           - **Linux (Fedora / Ubuntu / x86_64)**: Download `Geographical-Adventures-Linux-Fedora.zip`, unzip and run `./Geographical Adventures.x86_64`.
 
           **Highlights & Features:**
-          - **Modern Arabic Typography (Cairo Font)**: Sleek, high-definition gaming font for all Arabic UI, quest notifications, and menus.
-          - **Enhanced Touch Controls & Button Opacity**: Larger mobile buttons, responsive virtual joystick, and customizable button opacity / transient level (20% to 100%) like eFootball Mobile / PES.
-          - **Clean Cockpit & HUD**: Polished flight-avionics UI without corrupted glyphs or missing icons.
-          - **Fixed Sun Shadows & High FPS**: Planet terminator shadow fixes and smooth 60+ FPS on Android.
-          - **Forced Landscape**: Native landscape lock for mobile devices.
+          - **Full Multiplatform Support**: Native Android APK, Windows x64 executable, and Linux x86_64 builds.
+          - **Modern Arabic Typography (Cairo Font)**: Sleek, high-definition gaming font with 100% Arabic glyph coverage.
+          - **Dedicated Mobile Controls in Settings**: Larger mobile buttons, responsive dynamic joystick, and customizable transient button opacity (20% to 100%).
+          - **Clean Cockpit & Flight HUD**: Polished flight-avionics UI without corrupted glyphs or missing icons.
+          - **Fixed Sun Shadows & High FPS**: Terminator shadow fixes and smooth 60+ FPS performance.
+          - **Forced Landscape**: Native landscape lock on mobile devices.
           EOF
 
           BUILD_TAG="v0.1.${{ github.run_number }}"
