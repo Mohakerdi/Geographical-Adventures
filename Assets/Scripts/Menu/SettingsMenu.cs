@@ -111,6 +111,21 @@ public class SettingsMenu : Menu
 		musicVolumeSlider.SetValueWithoutNotify(settings.musicVolume);
 		sfxVolumeSlider.SetValueWithoutNotify(settings.sfxVolume);
 
+		// Mobile Controls Opacity
+		float op = Mathf.Clamp(settings.mobileControlsOpacity, 0.20f, 1.00f);
+		activeOpacityIndex = 3;
+		for (int i = 0; i < OpacityLevels.Length; i++)
+		{
+			if (Mathf.Abs(OpacityLevels[i] - op) < 0.05f)
+			{
+				activeOpacityIndex = i;
+				break;
+			}
+		}
+		if (mobileOpacityValueText != null)
+		{
+			mobileOpacityValueText.text = OpacityNames[activeOpacityIndex];
+		}
 	}
 
 	// Construct settings struct from user's chosen settings
@@ -144,6 +159,16 @@ public class SettingsMenu : Menu
 		settings.masterVolume = masterVolumeSlider.value;
 		settings.sfxVolume = sfxVolumeSlider.value;
 		settings.musicVolume = musicVolumeSlider.value;
+
+		// Mobile Controls Opacity
+		if (activeOpacityIndex >= 0 && activeOpacityIndex < OpacityLevels.Length)
+		{
+			settings.mobileControlsOpacity = OpacityLevels[activeOpacityIndex];
+		}
+		else
+		{
+			settings.mobileControlsOpacity = 0.80f;
+		}
 		return settings;
 	}
 
@@ -178,6 +203,13 @@ public class SettingsMenu : Menu
 
 		RenderSettingsController.SetTerrainQuality(settings.terrainQuality);
 		RenderSettingsController.SetShadowQuality(settings.shadowQuality);
+
+		// Mobile controls
+		float op = Mathf.Clamp(settings.mobileControlsOpacity, 0.20f, 1.00f);
+		if (GeoGame.InputMobile.MobileControls.Instance != null)
+		{
+			GeoGame.InputMobile.MobileControls.Instance.SetOpacity(op);
+		}
 
 		// Save
 		lastAppliedSettings = settings;
@@ -473,21 +505,16 @@ public class SettingsMenu : Menu
 		}
 
 		// Create Card Container
-		mobileSettingsCard = new GameObject("MobileControlsSettingsCard", typeof(RectTransform), typeof(Image), typeof(VerticalLayoutGroup));
+		mobileSettingsCard = new GameObject("MobileControlsSettingsCard", typeof(RectTransform), typeof(VerticalLayoutGroup));
 		mobileSettingsCard.transform.SetParent(parent, false);
 		mobileSettingsCard.transform.SetSiblingIndex(0); // Position at top of Controls tab
 
 		RectTransform cardRt = mobileSettingsCard.GetComponent<RectTransform>();
-		cardRt.sizeDelta = new Vector2(900, 155);
-
-		Image cardImg = mobileSettingsCard.GetComponent<Image>();
-		cardImg.sprite = GeoGame.UI.FlightUITheme.PanelHUDSprite;
-		cardImg.type = Image.Type.Sliced;
-		cardImg.color = new Color(0.08f, 0.14f, 0.20f, 0.92f);
+		cardRt.sizeDelta = new Vector2(900, 110);
 
 		VerticalLayoutGroup vlg = mobileSettingsCard.GetComponent<VerticalLayoutGroup>();
-		vlg.padding = new RectOffset(25, 25, 14, 14);
-		vlg.spacing = 10;
+		vlg.padding = new RectOffset(20, 20, 10, 10);
+		vlg.spacing = 8;
 		vlg.childControlWidth = true;
 		vlg.childControlHeight = false;
 		vlg.childForceExpandWidth = true;
@@ -561,7 +588,7 @@ public class SettingsMenu : Menu
 		valBoxGo.GetComponent<RectTransform>().sizeDelta = new Vector2(130, 50);
 		valBoxGo.GetComponent<Image>().sprite = GeoGame.UI.FlightUITheme.ButtonNormalSprite;
 		valBoxGo.GetComponent<Image>().type = Image.Type.Sliced;
-		valBoxGo.GetComponent<Image>().color = new Color(0.05f, 0.10f, 0.16f, 0.9f);
+		valBoxGo.GetComponent<Image>().color = new Color(0.12f, 0.18f, 0.25f, 0.85f);
 		GameObject valTxtGo = new GameObject("ValTxt", typeof(RectTransform), typeof(TMP_Text));
 		valTxtGo.transform.SetParent(valBoxGo.transform, false);
 		StretchFull(valTxtGo.GetComponent<RectTransform>());
@@ -709,7 +736,9 @@ public struct Settings
 		settings.sfxVolume = PlayerPrefs.GetFloat(nameof(sfxVolume), defaultValue: 0.75f);
 
 		// Controls
-		settings.mobileControlsOpacity = PlayerPrefs.GetFloat("MobileControls_Opacity", defaultValue: 0.80f);
+		float op = PlayerPrefs.GetFloat("MobileControls_Opacity", defaultValue: 0.80f);
+		if (op < 0.20f || op > 1.0f) op = 0.80f;
+		settings.mobileControlsOpacity = op;
 		return settings;
 	}
 

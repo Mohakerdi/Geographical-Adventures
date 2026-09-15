@@ -19,26 +19,45 @@ namespace GeoGame.UI
 		public static FlightUITheme Instance { get; private set; }
 
 		// Flight Sprites (Procedurally generated in memory with 9-slice support for 100% build reliability)
-		public static Sprite ButtonNormalSprite { get; private set; }
-		public static Sprite ButtonHighlightSprite { get; private set; }
-		public static Sprite ButtonPressedSprite { get; private set; }
-		public static Sprite ButtonPrimarySprite { get; private set; }
-		public static Sprite ButtonDangerSprite { get; private set; }
-		public static Sprite PanelHUDSprite { get; private set; }
-		public static Sprite TabActiveSprite { get; private set; }
-		public static Sprite TabInactiveSprite { get; private set; }
-		public static Sprite AttitudeIndicatorSprite { get; private set; }
+		private static Sprite _buttonNormalSprite;
+		private static Sprite _buttonHighlightSprite;
+		private static Sprite _buttonPressedSprite;
+		private static Sprite _buttonPrimarySprite;
+		private static Sprite _buttonDangerSprite;
+		private static Sprite _panelHUDSprite;
+		private static Sprite _tabActiveSprite;
+		private static Sprite _tabInactiveSprite;
+		private static Sprite _attitudeIndicatorSprite;
+
+		public static Sprite ButtonNormalSprite { get { EnsureSprites(); return _buttonNormalSprite; } }
+		public static Sprite ButtonHighlightSprite { get { EnsureSprites(); return _buttonHighlightSprite; } }
+		public static Sprite ButtonPressedSprite { get { EnsureSprites(); return _buttonPressedSprite; } }
+		public static Sprite ButtonPrimarySprite { get { EnsureSprites(); return _buttonPrimarySprite; } }
+		public static Sprite ButtonDangerSprite { get { EnsureSprites(); return _buttonDangerSprite; } }
+		public static Sprite PanelHUDSprite { get { EnsureSprites(); return _panelHUDSprite; } }
+		public static Sprite TabActiveSprite { get { EnsureSprites(); return _tabActiveSprite; } }
+		public static Sprite TabInactiveSprite { get { EnsureSprites(); return _tabInactiveSprite; } }
+		public static Sprite AttitudeIndicatorSprite { get { EnsureSprites(); return _attitudeIndicatorSprite; } }
 
 		private static readonly HashSet<int> themedObjects = new HashSet<int>();
 
-		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
 		private static void AutoInitialize()
 		{
+			EnsureSprites();
 			if (Instance == null)
 			{
 				GameObject go = new GameObject("FlightUIThemeManager");
 				Instance = go.AddComponent<FlightUITheme>();
 				DontDestroyOnLoad(go);
+			}
+		}
+
+		public static void EnsureSprites()
+		{
+			if (_buttonNormalSprite == null)
+			{
+				GenerateFlightSprites();
 			}
 		}
 
@@ -220,10 +239,15 @@ namespace GeoGame.UI
 		private void ThemePanel(Image img)
 		{
 			if (img == null || img.GetComponent<Button>() != null) return;
+			// Never restyle mobile controls, sliders, or elements within scroll views (tabs, settings rows)
+			if (img.gameObject.name.Contains("MobileControls") || img.gameObject.name.Contains("ValBox") || img.gameObject.name.StartsWith("Btn")) return;
+			if (img.GetComponentInParent<ScrollRect>() != null) return;
+			if (img.GetComponentInParent<Slider>() != null) return;
+
 			string name = img.gameObject.name.ToLowerInvariant();
 
-			// Detect menu background holders / panels
-			if (name.Contains("panel") || name.Contains("holder") || name.Contains("background") || name.Contains("menuholder") || name.Contains("box"))
+			// Detect menu background holders / panels (top level only)
+			if (name.Contains("panel") || name.Contains("menuholder") || name == "background")
 			{
 				// Avoid tiny images or icons
 				RectTransform rt = img.rectTransform;
@@ -247,10 +271,10 @@ namespace GeoGame.UI
 
 		private static void GenerateFlightSprites()
 		{
-			if (ButtonNormalSprite != null) return;
+			if (_buttonNormalSprite != null) return;
 
 			// 1. Normal Flight Button: Dark titanium slate (#101A26) + glowing cyan border (#00D2FF) + HUD corner ticks
-			ButtonNormalSprite = CreateProceduralButtonSprite(
+			_buttonNormalSprite = CreateProceduralButtonSprite(
 				new Color(0.10f, 0.16f, 0.23f, 0.95f), // Top slate
 				new Color(0.06f, 0.09f, 0.14f, 0.98f), // Bottom deep slate
 				new Color(0.00f, 0.82f, 1.00f, 0.92f), // Cyan border
@@ -259,7 +283,7 @@ namespace GeoGame.UI
 			);
 
 			// 2. Highlight Flight Button: Luminous electric cyan cockpit glow
-			ButtonHighlightSprite = CreateProceduralButtonSprite(
+			_buttonHighlightSprite = CreateProceduralButtonSprite(
 				new Color(0.10f, 0.28f, 0.38f, 0.98f),
 				new Color(0.05f, 0.18f, 0.26f, 1.00f),
 				new Color(0.15f, 1.00f, 1.00f, 1.00f),
@@ -268,7 +292,7 @@ namespace GeoGame.UI
 			);
 
 			// 3. Pressed Flight Button: Tactical afterburner amber (#FFA000)
-			ButtonPressedSprite = CreateProceduralButtonSprite(
+			_buttonPressedSprite = CreateProceduralButtonSprite(
 				new Color(0.35f, 0.20f, 0.05f, 1.00f),
 				new Color(0.20f, 0.10f, 0.02f, 1.00f),
 				new Color(1.00f, 0.70f, 0.00f, 1.00f),
@@ -277,7 +301,7 @@ namespace GeoGame.UI
 			);
 
 			// 4. Primary Action Button: Emerald / Flight Engage green-cyan (#00E676)
-			ButtonPrimarySprite = CreateProceduralButtonSprite(
+			_buttonPrimarySprite = CreateProceduralButtonSprite(
 				new Color(0.06f, 0.22f, 0.16f, 0.98f),
 				new Color(0.03f, 0.13f, 0.10f, 1.00f),
 				new Color(0.00f, 0.92f, 0.52f, 0.96f),
@@ -286,7 +310,7 @@ namespace GeoGame.UI
 			);
 
 			// 5. Danger / Quit Button: Aviation warning coral (#FF453A)
-			ButtonDangerSprite = CreateProceduralButtonSprite(
+			_buttonDangerSprite = CreateProceduralButtonSprite(
 				new Color(0.24f, 0.08f, 0.10f, 0.98f),
 				new Color(0.14f, 0.05f, 0.06f, 1.00f),
 				new Color(1.00f, 0.30f, 0.28f, 0.96f),
@@ -295,10 +319,10 @@ namespace GeoGame.UI
 			);
 
 			// 6. Glass Cockpit HUD Panel (Dark glass with cyan HUD corner brackets)
-			PanelHUDSprite = CreateProceduralPanelSprite();
+			_panelHUDSprite = CreateProceduralPanelSprite();
 
 			// 7. Attitude Indicator (Horizon & Wings)
-			AttitudeIndicatorSprite = CreateAttitudeIndicatorSprite();
+			_attitudeIndicatorSprite = CreateAttitudeIndicatorSprite();
 		}
 
 		private static Sprite CreateProceduralButtonSprite(Color bgTop, Color bgBot, Color borderCol, Color tickCol, bool glow)
@@ -385,9 +409,12 @@ namespace GeoGame.UI
 
 			tex.SetPixels(pixels);
 			tex.Apply();
+			tex.hideFlags = HideFlags.DontSave;
 
 			// 9-slice borders (16px left, 16px bottom, 16px right, 16px top)
-			return Sprite.Create(tex, new Rect(0, 0, w, h), new Vector2(0.5f, 0.5f), 100f, 0, SpriteMeshType.FullRect, new Vector4(16, 16, 16, 16));
+			Sprite spr = Sprite.Create(tex, new Rect(0, 0, w, h), new Vector2(0.5f, 0.5f), 100f, 0, SpriteMeshType.FullRect, new Vector4(16, 16, 16, 16));
+			spr.hideFlags = HideFlags.DontSave;
+			return spr;
 		}
 
 		private static Sprite CreateProceduralPanelSprite()
@@ -435,7 +462,10 @@ namespace GeoGame.UI
 
 			tex.SetPixels(pixels);
 			tex.Apply();
-			return Sprite.Create(tex, new Rect(0, 0, w, h), new Vector2(0.5f, 0.5f), 100f, 0, SpriteMeshType.FullRect, new Vector4(18, 18, 18, 18));
+			tex.hideFlags = HideFlags.DontSave;
+			Sprite pSpr = Sprite.Create(tex, new Rect(0, 0, w, h), new Vector2(0.5f, 0.5f), 100f, 0, SpriteMeshType.FullRect, new Vector4(18, 18, 18, 18));
+			pSpr.hideFlags = HideFlags.DontSave;
+			return pSpr;
 		}
 
 		private static Sprite CreateAttitudeIndicatorSprite()
@@ -505,7 +535,10 @@ namespace GeoGame.UI
 
 			tex.SetPixels(pixels);
 			tex.Apply();
-			return Sprite.Create(tex, new Rect(0, 0, sz, sz), new Vector2(0.5f, 0.5f));
+			tex.hideFlags = HideFlags.DontSave;
+			Sprite aSpr = Sprite.Create(tex, new Rect(0, 0, sz, sz), new Vector2(0.5f, 0.5f));
+			aSpr.hideFlags = HideFlags.DontSave;
+			return aSpr;
 		}
 	}
 

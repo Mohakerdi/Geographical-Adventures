@@ -8,11 +8,12 @@ namespace GeoGame.Localization.Arabic
 	/// <summary>
 	/// Manages the game-wide Arabic gaming font (Cairo-Bold), ensuring all Arabic
 	/// text across menus, HUD, country tooltips, and dialogs renders with crisp
-	/// neo-grotesque gaming typography.
+	/// neo-grotesque gaming typography, with NotoSansArabic as resilient secondary fallback.
 	/// </summary>
 	public static class ArabicFontManager
 	{
 		private static TMP_FontAsset arabicFontAsset;
+		private static TMP_FontAsset notoFontAsset;
 		private static bool initialized = false;
 
 		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
@@ -20,21 +21,34 @@ namespace GeoGame.Localization.Arabic
 		{
 			if (initialized && arabicFontAsset != null) return;
 
-			Font ttf = Resources.Load<Font>("Fonts/Cairo-Bold");
-			if (ttf == null) ttf = Resources.Load<Font>("Fonts/Cairo-Black");
-			if (ttf == null) ttf = Resources.Load<Font>("Fonts/NotoSansArabic-Bold");
+			Font cairoTTF = Resources.Load<Font>("Fonts/Cairo-Bold");
+			if (cairoTTF == null) cairoTTF = Resources.Load<Font>("Fonts/Cairo-Black");
 
-			if (ttf == null)
+			Font notoTTF = Resources.Load<Font>("Fonts/NotoSansArabic-Bold");
+
+			Font primaryTTF = cairoTTF != null ? cairoTTF : notoTTF;
+			if (primaryTTF == null)
 			{
 				Debug.LogWarning("ArabicFontManager: Could not load Cairo or Arabic font from Resources.");
 				return;
 			}
 
-			// Create dynamic TMP font asset with gaming-oriented SDFAA rendering
-			arabicFontAsset = TMP_FontAsset.CreateFontAsset(ttf, 44, 5, UnityEngine.TextCore.LowLevel.GlyphRenderMode.SDFAA, 1024, 1024);
+			// Create primary dynamic TMP font asset with gaming-oriented SDFAA rendering
+			arabicFontAsset = TMP_FontAsset.CreateFontAsset(primaryTTF, 44, 5, UnityEngine.TextCore.LowLevel.GlyphRenderMode.SDFAA, 1024, 1024);
 			if (arabicFontAsset != null)
 			{
 				arabicFontAsset.name = "Cairo-Bold SDF Dynamic";
+
+				// Secondary fallback (Noto Sans) in case any exotic glyph is requested
+				if (notoTTF != null && notoTTF != primaryTTF)
+				{
+					notoFontAsset = TMP_FontAsset.CreateFontAsset(notoTTF, 44, 5, UnityEngine.TextCore.LowLevel.GlyphRenderMode.SDFAA, 512, 512);
+					if (notoFontAsset != null)
+					{
+						notoFontAsset.name = "NotoSansArabic-Bold SDF Fallback";
+						AddToFallback(arabicFontAsset, notoFontAsset);
+					}
+				}
 
 				RegisterFallbacks();
 
@@ -66,14 +80,16 @@ namespace GeoGame.Localization.Arabic
 
 			if (TMP_Settings.defaultFontAsset != null)
 			{
+				if (notoFontAsset != null) AddToFallback(TMP_Settings.defaultFontAsset, notoFontAsset);
 				AddToFallback(TMP_Settings.defaultFontAsset, arabicFontAsset);
 			}
 
 			TMP_FontAsset[] allFonts = Resources.FindObjectsOfTypeAll<TMP_FontAsset>();
 			foreach (var f in allFonts)
 			{
-				if (f != arabicFontAsset)
+				if (f != arabicFontAsset && f != notoFontAsset)
 				{
+					if (notoFontAsset != null) AddToFallback(f, notoFontAsset);
 					AddToFallback(f, arabicFontAsset);
 				}
 			}

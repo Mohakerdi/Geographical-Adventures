@@ -55,7 +55,9 @@ namespace GeoGame.InputMobile
 		{
 			get
 			{
-				return PlayerPrefs.GetFloat("MobileControls_Opacity", 0.80f);
+				float op = PlayerPrefs.GetFloat("MobileControls_Opacity", 0.80f);
+				if (op < 0.20f || op > 1.0f) op = 0.80f;
+				return op;
 			}
 		}
 
@@ -161,6 +163,12 @@ namespace GeoGame.InputMobile
 			// Show/hide controls depending on game state
 			bool isPlaying = GameController.IsState(GameState.Playing);
 			bool isMap = GameController.IsState(GameState.ViewingMap);
+
+			// Ensure master canvas group opacity remains valid
+			if (masterCanvasGroup != null && masterCanvasGroup.alpha < 0.15f)
+			{
+				masterCanvasGroup.alpha = ControlsOpacity;
+			}
 
 			if (flightControlsGroup != null)
 			{
@@ -543,7 +551,9 @@ namespace GeoGame.InputMobile
 				}
 			}
 			circleTex.Apply();
+			circleTex.hideFlags = HideFlags.DontSave;
 			circleSprite = Sprite.Create(circleTex, new Rect(0, 0, sz, sz), new Vector2(0.5f, 0.5f));
+			circleSprite.hideFlags = HideFlags.DontSave;
 
 			// Hollow Ring
 			Texture2D hollowTex = new Texture2D(sz, sz, TextureFormat.RGBA32, false);
@@ -563,7 +573,9 @@ namespace GeoGame.InputMobile
 				}
 			}
 			hollowTex.Apply();
+			hollowTex.hideFlags = HideFlags.DontSave;
 			circleHollowSprite = Sprite.Create(hollowTex, new Rect(0, 0, sz, sz), new Vector2(0.5f, 0.5f));
+			circleHollowSprite.hideFlags = HideFlags.DontSave;
 		}
 	}
 

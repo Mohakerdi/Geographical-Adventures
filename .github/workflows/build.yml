@@ -158,12 +158,10 @@ jobs:
             --notes-file release_notes.md || true
 
           echo "Updating rolling latest release..."
-          if gh release view latest > /dev/null 2>&1; then
-            gh release edit latest --title "Geographical Adventures - Latest Build" --notes-file release_notes.md --latest
-            gh release upload latest release-assets/* --clobber
-          else
-            gh release create latest release-assets/* \
-              --title "Geographical Adventures - Latest Build" \
-              --notes-file release_notes.md \
-              --latest
-          fi
+          gh release delete latest --yes || true
+          git tag -f latest ${{ github.sha }}
+          git push -f origin latest
+          gh release create latest release-assets/* \
+            --title "Geographical Adventures - Latest Build" \
+            --notes-file release_notes.md \
+            --latest
