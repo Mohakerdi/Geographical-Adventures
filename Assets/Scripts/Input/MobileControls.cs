@@ -73,6 +73,25 @@ namespace GeoGame.InputMobile
 			onOpacityChanged?.Invoke(clamped);
 		}
 
+		public bool IsControlsEnabled
+		{
+			get
+			{
+				bool isMobile = Application.isMobilePlatform || SystemInfo.deviceType == DeviceType.Handheld;
+				return PlayerPrefs.GetInt("MobileControls_Enabled", isMobile ? 1 : 0) == 1;
+			}
+		}
+
+		public void SetMobileControlsEnabled(bool enabled)
+		{
+			PlayerPrefs.SetInt("MobileControls_Enabled", enabled ? 1 : 0);
+			PlayerPrefs.Save();
+			if (canvasObj != null)
+			{
+				canvasObj.SetActive(enabled);
+			}
+		}
+
 		public bool IsActive
 		{
 			get

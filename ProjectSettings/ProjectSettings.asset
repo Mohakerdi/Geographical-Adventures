@@ -564,9 +564,12 @@ PlayerSettings:
   additionalCompilerArguments: {}
   platformArchitecture: {}
   scriptingBackend:
+    Android: 1
     Standalone: 0
-  il2cppCompilerConfiguration: {}
-  managedStrippingLevel: {}
+  il2cppCompilerConfiguration:
+    Android: 1
+  managedStrippingLevel:
+    Android: 1
   incrementalIl2cppBuild: {}
   suppressCommonWarnings: 1
   allowUnsafeCode: 0

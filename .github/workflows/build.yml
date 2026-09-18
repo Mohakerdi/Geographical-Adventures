@@ -58,6 +58,25 @@ jobs:
     name: Build for Android Phone (.apk)
     runs-on: ubuntu-latest
     steps:
+      - name: Free Disk Space
+        run: |
+          echo "Freeing disk space on runner for Android IL2CPP ARM64 build..."
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /opt/ghc
+          sudo rm -rf "/usr/local/share/boost"
+          sudo rm -rf "$AGENT_TOOLSDIRECTORY"
+          df -h
+
+      - name: Set up Swap Space
+        run: |
+          echo "Configuring 6GB swapfile to provide memory headroom during C++ compilation..."
+          sudo fallocate -l 6G /swapfile || sudo dd if=/dev/zero of=/swapfile bs=1M count=6144
+          sudo chmod 600 /swapfile
+          sudo mkswap /swapfile
+          sudo swapon /swapfile
+          free -h
+
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -65,8 +84,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: Library
-          key: Library-Android-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
+          key: Library-Android-IL2CPP-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
           restore-keys: |
+            Library-Android-IL2CPP-
             Library-Android-
             Library-
 
@@ -186,14 +206,15 @@ jobs:
           cat << 'EOF' > release_notes.md
           ### Geographical Adventures - Latest Builds
           Downloadable standalone builds for Android, Windows, and Linux:
-          - **Android APK**: Download and install `Geographical-Adventures.apk` directly on your Android phone or tablet.
+          - **Android APK**: Download and install `Geographical-Adventures.apk` directly on your Android phone or tablet (Universal build supporting modern 64-bit ARM64 and 32-bit ARMv7 devices).
           - **Windows (64-bit)**: Download `Geographical-Adventures-Windows-x64.zip`, unzip and launch `Geographical Adventures.exe`.
           - **Linux (Fedora / Ubuntu / x86_64)**: Download `Geographical-Adventures-Linux-Fedora.zip`, unzip and run `./Geographical Adventures.x86_64`.
 
           **Highlights & Features:**
-          - **Full Multiplatform Support**: Native Android APK, Windows x64 executable, and Linux x86_64 builds.
+          - **Full Multiplatform Support**: Native Android APK (ARM64 + ARMv7 via IL2CPP), Windows x64 executable, and Linux x86_64 builds.
+          - **Modern 64-bit ARM64 Android Compatibility**: Native support for modern Android devices (Google Pixel, Samsung Galaxy, Xiaomi, OnePlus) resolving previous install errors.
+          - **Interactive Controls Settings**: Full touch controls HUD customization, transient button opacity stepper (20% to 100%), touch controls toggle, and dual-mode switcher between Touch Controls and Gamepad/Keyboard bindings.
           - **Modern Arabic Typography (Cairo Font)**: Sleek, high-definition gaming font with 100% Arabic glyph coverage.
-          - **Dedicated Mobile Controls in Settings**: Larger mobile buttons, responsive dynamic joystick, and customizable transient button opacity (20% to 100%).
           - **Clean Cockpit & Flight HUD**: Polished flight-avionics UI without corrupted glyphs or missing icons.
           - **Fixed Sun Shadows & High FPS**: Terminator shadow fixes and smooth 60+ FPS performance.
           - **Forced Landscape**: Native landscape lock on mobile devices.

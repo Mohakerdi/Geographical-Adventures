@@ -470,9 +470,19 @@ public class SettingsMenu : Menu
 		}
 	}
 
-	// Mobile Controls Settings (Opacity / Transient Level)
+	// Mobile Controls Settings (Opacity / Transient Level / Guide / Toggle)
 	private GameObject mobileSettingsCard;
-	private TMP_Text mobileOpacityValueText;
+	private GameObject touchSettingsContent;
+	private ScrollRect pcControlsScroll;
+	private TextMeshProUGUI mobileOpacityValueText;
+	private TextMeshProUGUI touchToggleBtnText;
+	private Image touchToggleBtnImg;
+	private Button touchModeBtn;
+	private Button physicalModeBtn;
+	private TextMeshProUGUI touchModeTxt;
+	private TextMeshProUGUI physicalModeTxt;
+	private bool isTouchModeActive = true;
+
 	private static readonly float[] OpacityLevels = new float[] { 0.20f, 0.40f, 0.60f, 0.80f, 1.00f };
 	private static readonly string[] OpacityNames = new string[] { "20%", "40%", "60%", "80%", "100%" };
 	private int activeOpacityIndex = 3; // default 80%
@@ -488,28 +498,21 @@ public class SettingsMenu : Menu
 
 		bool isMobile = Application.isMobilePlatform || SystemInfo.deviceType == DeviceType.Handheld || (GeoGame.InputMobile.MobileControls.Instance != null && GeoGame.InputMobile.MobileControls.Instance.forceEnableInEditor);
 
-		ScrollRect scroll = controlsContainer.GetComponentInChildren<ScrollRect>(true);
-
-		if (!isMobile)
+		if (pcControlsScroll == null)
 		{
-			// On PC / Desktop, show standard keyboard rebinding scroll view
-			if (scroll != null) scroll.gameObject.SetActive(true);
-			if (mobileSettingsCard != null) mobileSettingsCard.SetActive(false);
-			return;
-		}
-
-		// On Mobile / Android APK: Completely hide PC keyboard rebind controls
-		if (scroll != null)
-		{
-			scroll.gameObject.SetActive(false);
+			pcControlsScroll = controlsContainer.GetComponentInChildren<ScrollRect>(true);
 		}
 
 		if (mobileSettingsCard != null)
 		{
 			mobileSettingsCard.SetActive(true);
+			SetControlsSubView(isTouchModeActive);
 			UpdateMobileSettingsLabels();
 			return;
 		}
+
+		// Initial subview state: touch mode for mobile devices, physical rebinds for PC
+		isTouchModeActive = isMobile;
 
 		// Load current opacity setting
 		float currentOp = PlayerPrefs.GetFloat("MobileControls_Opacity", 0.80f);
@@ -524,50 +527,170 @@ public class SettingsMenu : Menu
 		}
 
 		// Create Dedicated Mobile Controls Container directly on the Controls Tab
-		mobileSettingsCard = new GameObject("MobileControlsSettingsCard", typeof(RectTransform), typeof(VerticalLayoutGroup));
+		mobileSettingsCard = new GameObject("MobileControlsSettingsCard", typeof(RectTransform), typeof(Image), typeof(VerticalLayoutGroup));
 		mobileSettingsCard.transform.SetParent(controlsContainer, false);
 
 		RectTransform cardRt = mobileSettingsCard.GetComponent<RectTransform>();
 		cardRt.anchorMin = Vector2.zero;
 		cardRt.anchorMax = Vector2.one;
-		cardRt.offsetMin = new Vector2(40, 20);
-		cardRt.offsetMax = new Vector2(-40, -20);
+		cardRt.offsetMin = new Vector2(20, 10);
+		cardRt.offsetMax = new Vector2(-20, -10);
+
+		Image cardBg = mobileSettingsCard.GetComponent<Image>();
+		cardBg.sprite = GeoGame.UI.FlightUITheme.PanelHUDSprite;
+		cardBg.type = Image.Type.Sliced;
+		cardBg.color = new Color(0.06f, 0.10f, 0.16f, 0.95f);
 
 		VerticalLayoutGroup vlg = mobileSettingsCard.GetComponent<VerticalLayoutGroup>();
-		vlg.padding = new RectOffset(20, 20, 15, 15);
-		vlg.spacing = 18;
+		vlg.padding = new RectOffset(18, 18, 14, 14);
+		vlg.spacing = 12;
 		vlg.childAlignment = TextAnchor.UpperCenter;
 		vlg.childControlWidth = true;
 		vlg.childControlHeight = false;
 		vlg.childForceExpandWidth = true;
 		vlg.childForceExpandHeight = false;
 
-		// 1. Header
-		GameObject headerGo = new GameObject("Header", typeof(RectTransform), typeof(TMP_Text));
-		headerGo.transform.SetParent(mobileSettingsCard.transform, false);
+		// 1. Top Sub-view Switcher Bar: [ 📱 Touch Controls ]  [ 🎮 Gamepad & Keys ]
+		GameObject switcherRowGo = new GameObject("SwitcherRow", typeof(RectTransform), typeof(HorizontalLayoutGroup));
+		switcherRowGo.transform.SetParent(mobileSettingsCard.transform, false);
+		RectTransform switchRt = switcherRowGo.GetComponent<RectTransform>();
+		switchRt.sizeDelta = new Vector2(0, 44);
+		HorizontalLayoutGroup switchHlg = switcherRowGo.GetComponent<HorizontalLayoutGroup>();
+		switchHlg.childControlWidth = true;
+		switchHlg.childControlHeight = true;
+		switchHlg.childForceExpandWidth = true;
+		switchHlg.childForceExpandHeight = true;
+		switchHlg.childAlignment = TextAnchor.MiddleCenter;
+		switchHlg.spacing = 15;
+
+		// Switcher: Touch Controls Tab Button
+		GameObject touchBtnGo = new GameObject("BtnTouchMode", typeof(RectTransform), typeof(Image), typeof(Button));
+		touchBtnGo.transform.SetParent(switcherRowGo.transform, false);
+		touchBtnGo.GetComponent<Image>().sprite = GeoGame.UI.FlightUITheme.ButtonNormalSprite;
+		touchBtnGo.GetComponent<Image>().type = Image.Type.Sliced;
+		touchModeBtn = touchBtnGo.GetComponent<Button>();
+
+		GameObject touchTxtGo = new GameObject("Txt", typeof(RectTransform), typeof(TextMeshProUGUI));
+		touchTxtGo.transform.SetParent(touchBtnGo.transform, false);
+		StretchFull(touchTxtGo.GetComponent<RectTransform>());
+		touchModeTxt = touchTxtGo.GetComponent<TextMeshProUGUI>();
+		touchModeTxt.fontSize = 20;
+		touchModeTxt.fontStyle = FontStyles.Bold;
+		touchModeTxt.alignment = TextAlignmentOptions.Center;
+		touchModeTxt.color = Color.white;
+
+		// Switcher: Physical Gamepad / Keys Tab Button
+		GameObject physBtnGo = new GameObject("BtnPhysMode", typeof(RectTransform), typeof(Image), typeof(Button));
+		physBtnGo.transform.SetParent(switcherRowGo.transform, false);
+		physBtnGo.GetComponent<Image>().sprite = GeoGame.UI.FlightUITheme.ButtonNormalSprite;
+		physBtnGo.GetComponent<Image>().type = Image.Type.Sliced;
+		physicalModeBtn = physBtnGo.GetComponent<Button>();
+
+		GameObject physTxtGo = new GameObject("Txt", typeof(RectTransform), typeof(TextMeshProUGUI));
+		physTxtGo.transform.SetParent(physBtnGo.transform, false);
+		StretchFull(physTxtGo.GetComponent<RectTransform>());
+		physicalModeTxt = physTxtGo.GetComponent<TextMeshProUGUI>();
+		physicalModeTxt.fontSize = 20;
+		physicalModeTxt.fontStyle = FontStyles.Bold;
+		physicalModeTxt.alignment = TextAlignmentOptions.Center;
+		physicalModeTxt.color = Color.white;
+
+		touchModeBtn.onClick.AddListener(() => SetControlsSubView(true));
+		physicalModeBtn.onClick.AddListener(() => SetControlsSubView(false));
+
+		// 2. Touch Controls Content Container
+		touchSettingsContent = new GameObject("TouchSettingsContent", typeof(RectTransform), typeof(VerticalLayoutGroup));
+		touchSettingsContent.transform.SetParent(mobileSettingsCard.transform, false);
+		VerticalLayoutGroup tVlg = touchSettingsContent.GetComponent<VerticalLayoutGroup>();
+		tVlg.padding = new RectOffset(0, 0, 0, 0);
+		tVlg.spacing = 10;
+		tVlg.childAlignment = TextAnchor.UpperCenter;
+		tVlg.childControlWidth = true;
+		tVlg.childControlHeight = false;
+		tVlg.childForceExpandWidth = true;
+		tVlg.childForceExpandHeight = false;
+
+		// Header
+		GameObject headerGo = new GameObject("Header", typeof(RectTransform), typeof(TextMeshProUGUI));
+		headerGo.transform.SetParent(touchSettingsContent.transform, false);
 		RectTransform hRt = headerGo.GetComponent<RectTransform>();
-		hRt.sizeDelta = new Vector2(0, 40);
-		TMP_Text hTxt = headerGo.GetComponent<TMP_Text>();
-		hTxt.fontSize = 28;
+		hRt.sizeDelta = new Vector2(0, 32);
+		TextMeshProUGUI hTxt = headerGo.GetComponent<TextMeshProUGUI>();
+		hTxt.fontSize = 24;
 		hTxt.fontStyle = FontStyles.Bold;
 		hTxt.color = new Color(0f, 0.90f, 1f, 1f); // Neon Cyan HUD
 		hTxt.alignment = TextAlignmentOptions.Center;
 
-		// 2. Subheader
-		GameObject subheaderGo = new GameObject("Subheader", typeof(RectTransform), typeof(TMP_Text));
-		subheaderGo.transform.SetParent(mobileSettingsCard.transform, false);
+		// Subheader
+		GameObject subheaderGo = new GameObject("Subheader", typeof(RectTransform), typeof(TextMeshProUGUI));
+		subheaderGo.transform.SetParent(touchSettingsContent.transform, false);
 		RectTransform subRt = subheaderGo.GetComponent<RectTransform>();
-		subRt.sizeDelta = new Vector2(0, 30);
-		TMP_Text subTxt = subheaderGo.GetComponent<TMP_Text>();
-		subTxt.fontSize = 18;
+		subRt.sizeDelta = new Vector2(0, 24);
+		TextMeshProUGUI subTxt = subheaderGo.GetComponent<TextMeshProUGUI>();
+		subTxt.fontSize = 16;
 		subTxt.color = new Color(0.85f, 0.90f, 0.95f, 0.9f);
 		subTxt.alignment = TextAlignmentOptions.Center;
 
-		// 3. Opacity / Transient Level Row
+		// Toggle Row: Touch HUD Active [ ON / OFF ]
+		GameObject toggleRowGo = new GameObject("ToggleRow", typeof(RectTransform), typeof(HorizontalLayoutGroup));
+		toggleRowGo.transform.SetParent(touchSettingsContent.transform, false);
+		RectTransform togRt = toggleRowGo.GetComponent<RectTransform>();
+		togRt.sizeDelta = new Vector2(0, 48);
+		HorizontalLayoutGroup togHlg = toggleRowGo.GetComponent<HorizontalLayoutGroup>();
+		togHlg.childControlWidth = false;
+		togHlg.childControlHeight = true;
+		togHlg.childForceExpandWidth = false;
+		togHlg.childForceExpandHeight = true;
+		togHlg.childAlignment = TextAnchor.MiddleCenter;
+		togHlg.spacing = 25;
+
+		GameObject togTitleGo = new GameObject("Title", typeof(RectTransform), typeof(TextMeshProUGUI));
+		togTitleGo.transform.SetParent(toggleRowGo.transform, false);
+		RectTransform togTitleRt = togTitleGo.GetComponent<RectTransform>();
+		togTitleRt.sizeDelta = new Vector2(420, 46);
+		TextMeshProUGUI togTitleTxt = togTitleGo.GetComponent<TextMeshProUGUI>();
+		togTitleTxt.fontSize = 20;
+		togTitleTxt.color = Color.white;
+		togTitleTxt.alignment = TextAlignmentOptions.MidlineLeft;
+
+		GameObject togBtnGo = new GameObject("BtnToggle", typeof(RectTransform), typeof(Image), typeof(Button));
+		togBtnGo.transform.SetParent(toggleRowGo.transform, false);
+		togBtnGo.GetComponent<RectTransform>().sizeDelta = new Vector2(280, 46);
+		mobileToggleBtnImg = togBtnGo.GetComponent<Image>();
+		mobileToggleBtnImg.sprite = GeoGame.UI.FlightUITheme.ButtonPrimarySprite;
+		mobileToggleBtnImg.type = Image.Type.Sliced;
+		Button togBtn = togBtnGo.GetComponent<Button>();
+
+		GameObject togBtnTxtGo = new GameObject("Txt", typeof(RectTransform), typeof(TextMeshProUGUI));
+		togBtnTxtGo.transform.SetParent(togBtnGo.transform, false);
+		StretchFull(togBtnTxtGo.GetComponent<RectTransform>());
+		touchToggleBtnText = togBtnTxtGo.GetComponent<TextMeshProUGUI>();
+		touchToggleBtnText.fontSize = 20;
+		touchToggleBtnText.fontStyle = FontStyles.Bold;
+		touchToggleBtnText.alignment = TextAlignmentOptions.Center;
+		touchToggleBtnText.color = Color.white;
+
+		togBtn.onClick.AddListener(() =>
+		{
+			bool cur = PlayerPrefs.GetInt("MobileControls_Enabled", 1) == 1;
+			bool next = !cur;
+			if (GeoGame.InputMobile.MobileControls.Instance != null)
+			{
+				GeoGame.InputMobile.MobileControls.Instance.SetMobileControlsEnabled(next);
+			}
+			else
+			{
+				PlayerPrefs.SetInt("MobileControls_Enabled", next ? 1 : 0);
+				PlayerPrefs.Save();
+			}
+			UpdateToggleVisuals(next);
+		});
+
+		// Opacity / Transient Level Row
 		GameObject rowGo = new GameObject("OpacityRow", typeof(RectTransform), typeof(HorizontalLayoutGroup));
-		rowGo.transform.SetParent(mobileSettingsCard.transform, false);
+		rowGo.transform.SetParent(touchSettingsContent.transform, false);
 		RectTransform rowRt = rowGo.GetComponent<RectTransform>();
-		rowRt.sizeDelta = new Vector2(0, 60);
+		rowRt.sizeDelta = new Vector2(0, 50);
 		HorizontalLayoutGroup rowHlg = rowGo.GetComponent<HorizontalLayoutGroup>();
 		rowHlg.childControlWidth = false;
 		rowHlg.childControlHeight = true;
@@ -576,13 +699,12 @@ public class SettingsMenu : Menu
 		rowHlg.childAlignment = TextAnchor.MiddleCenter;
 		rowHlg.spacing = 25;
 
-		// Row Title Label
-		GameObject titleGo = new GameObject("Title", typeof(RectTransform), typeof(TMP_Text));
+		GameObject titleGo = new GameObject("Title", typeof(RectTransform), typeof(TextMeshProUGUI));
 		titleGo.transform.SetParent(rowGo.transform, false);
 		RectTransform titleRt = titleGo.GetComponent<RectTransform>();
-		titleRt.sizeDelta = new Vector2(420, 50);
-		TMP_Text titleTxt = titleGo.GetComponent<TMP_Text>();
-		titleTxt.fontSize = 22;
+		titleRt.sizeDelta = new Vector2(420, 46);
+		TextMeshProUGUI titleTxt = titleGo.GetComponent<TextMeshProUGUI>();
+		titleTxt.fontSize = 20;
 		titleTxt.color = Color.white;
 		titleTxt.alignment = TextAlignmentOptions.MidlineLeft;
 
@@ -590,7 +712,7 @@ public class SettingsMenu : Menu
 		GameObject stepperGo = new GameObject("Stepper", typeof(RectTransform), typeof(HorizontalLayoutGroup));
 		stepperGo.transform.SetParent(rowGo.transform, false);
 		RectTransform stepperRt = stepperGo.GetComponent<RectTransform>();
-		stepperRt.sizeDelta = new Vector2(280, 50);
+		stepperRt.sizeDelta = new Vector2(280, 46);
 		HorizontalLayoutGroup stepHlg = stepperGo.GetComponent<HorizontalLayoutGroup>();
 		stepHlg.childControlWidth = false;
 		stepHlg.childControlHeight = true;
@@ -602,16 +724,16 @@ public class SettingsMenu : Menu
 		// Left Button [<]
 		GameObject btnLeftGo = new GameObject("BtnDecrease", typeof(RectTransform), typeof(Image), typeof(Button));
 		btnLeftGo.transform.SetParent(stepperGo.transform, false);
-		btnLeftGo.GetComponent<RectTransform>().sizeDelta = new Vector2(54, 50);
+		btnLeftGo.GetComponent<RectTransform>().sizeDelta = new Vector2(54, 46);
 		btnLeftGo.GetComponent<Image>().sprite = GeoGame.UI.FlightUITheme.ButtonNormalSprite;
 		btnLeftGo.GetComponent<Image>().type = Image.Type.Sliced;
 		Button btnLeft = btnLeftGo.GetComponent<Button>();
-		GameObject txtLeftGo = new GameObject("Txt", typeof(RectTransform), typeof(TMP_Text));
+		GameObject txtLeftGo = new GameObject("Txt", typeof(RectTransform), typeof(TextMeshProUGUI));
 		txtLeftGo.transform.SetParent(btnLeftGo.transform, false);
 		StretchFull(txtLeftGo.GetComponent<RectTransform>());
-		TMP_Text lTxt = txtLeftGo.GetComponent<TMP_Text>();
+		TextMeshProUGUI lTxt = txtLeftGo.GetComponent<TextMeshProUGUI>();
 		lTxt.text = "<";
-		lTxt.fontSize = 26;
+		lTxt.fontSize = 24;
 		lTxt.fontStyle = FontStyles.Bold;
 		lTxt.alignment = TextAlignmentOptions.Center;
 		lTxt.color = Color.white;
@@ -619,15 +741,15 @@ public class SettingsMenu : Menu
 		// Value Box [ 80% ]
 		GameObject valBoxGo = new GameObject("ValBox", typeof(RectTransform), typeof(Image));
 		valBoxGo.transform.SetParent(stepperGo.transform, false);
-		valBoxGo.GetComponent<RectTransform>().sizeDelta = new Vector2(140, 50);
+		valBoxGo.GetComponent<RectTransform>().sizeDelta = new Vector2(140, 46);
 		valBoxGo.GetComponent<Image>().sprite = GeoGame.UI.FlightUITheme.ButtonNormalSprite;
 		valBoxGo.GetComponent<Image>().type = Image.Type.Sliced;
 		valBoxGo.GetComponent<Image>().color = new Color(0.12f, 0.18f, 0.25f, 0.85f);
-		GameObject valTxtGo = new GameObject("ValTxt", typeof(RectTransform), typeof(TMP_Text));
+		GameObject valTxtGo = new GameObject("ValTxt", typeof(RectTransform), typeof(TextMeshProUGUI));
 		valTxtGo.transform.SetParent(valBoxGo.transform, false);
 		StretchFull(valTxtGo.GetComponent<RectTransform>());
-		mobileOpacityValueText = valTxtGo.GetComponent<TMP_Text>();
-		mobileOpacityValueText.fontSize = 24;
+		mobileOpacityValueText = valTxtGo.GetComponent<TextMeshProUGUI>();
+		mobileOpacityValueText.fontSize = 22;
 		mobileOpacityValueText.fontStyle = FontStyles.Bold;
 		mobileOpacityValueText.alignment = TextAlignmentOptions.Center;
 		mobileOpacityValueText.color = new Color(0f, 0.9f, 1f, 1f); // Neon cyan
@@ -636,16 +758,16 @@ public class SettingsMenu : Menu
 		// Right Button [>]
 		GameObject btnRightGo = new GameObject("BtnIncrease", typeof(RectTransform), typeof(Image), typeof(Button));
 		btnRightGo.transform.SetParent(stepperGo.transform, false);
-		btnRightGo.GetComponent<RectTransform>().sizeDelta = new Vector2(54, 50);
+		btnRightGo.GetComponent<RectTransform>().sizeDelta = new Vector2(54, 46);
 		btnRightGo.GetComponent<Image>().sprite = GeoGame.UI.FlightUITheme.ButtonNormalSprite;
 		btnRightGo.GetComponent<Image>().type = Image.Type.Sliced;
 		Button btnRight = btnRightGo.GetComponent<Button>();
-		GameObject txtRightGo = new GameObject("Txt", typeof(RectTransform), typeof(TMP_Text));
+		GameObject txtRightGo = new GameObject("Txt", typeof(RectTransform), typeof(TextMeshProUGUI));
 		txtRightGo.transform.SetParent(btnRightGo.transform, false);
 		StretchFull(txtRightGo.GetComponent<RectTransform>());
-		TMP_Text rTxt = txtRightGo.GetComponent<TMP_Text>();
+		TextMeshProUGUI rTxt = txtRightGo.GetComponent<TextMeshProUGUI>();
 		rTxt.text = ">";
-		rTxt.fontSize = 26;
+		rTxt.fontSize = 24;
 		rTxt.fontStyle = FontStyles.Bold;
 		rTxt.alignment = TextAlignmentOptions.Center;
 		rTxt.color = Color.white;
@@ -669,16 +791,82 @@ public class SettingsMenu : Menu
 		});
 
 		// 4. Controls Information & Layout Card
-		GameObject guideGo = new GameObject("GuideBox", typeof(RectTransform), typeof(TMP_Text));
-		guideGo.transform.SetParent(mobileSettingsCard.transform, false);
+		GameObject guideGo = new GameObject("GuideBox", typeof(RectTransform), typeof(Image), typeof(VerticalLayoutGroup));
+		guideGo.transform.SetParent(touchSettingsContent.transform, false);
 		RectTransform guideRt = guideGo.GetComponent<RectTransform>();
-		guideRt.sizeDelta = new Vector2(0, 110);
-		TMP_Text guideTxt = guideGo.GetComponent<TMP_Text>();
-		guideTxt.fontSize = 17;
-		guideTxt.color = new Color(0.70f, 0.85f, 1.0f, 0.90f);
+		guideRt.sizeDelta = new Vector2(0, 115);
+		Image guideBg = guideGo.GetComponent<Image>();
+		guideBg.sprite = GeoGame.UI.FlightUITheme.ButtonNormalSprite;
+		guideBg.type = Image.Type.Sliced;
+		guideBg.color = new Color(0.04f, 0.08f, 0.14f, 0.85f);
+
+		VerticalLayoutGroup gVlg = guideGo.GetComponent<VerticalLayoutGroup>();
+		gVlg.padding = new RectOffset(16, 16, 10, 10);
+		gVlg.childAlignment = TextAnchor.MiddleCenter;
+		gVlg.childControlWidth = true;
+		gVlg.childControlHeight = true;
+		gVlg.childForceExpandWidth = true;
+		gVlg.childForceExpandHeight = true;
+
+		GameObject guideTxtGo = new GameObject("Txt", typeof(RectTransform), typeof(TextMeshProUGUI));
+		guideTxtGo.transform.SetParent(guideGo.transform, false);
+		StretchFull(guideTxtGo.GetComponent<RectTransform>());
+		TextMeshProUGUI guideTxt = guideTxtGo.GetComponent<TextMeshProUGUI>();
+		guideTxt.fontSize = 16;
+		guideTxt.color = new Color(0.70f, 0.88f, 1.0f, 0.95f);
 		guideTxt.alignment = TextAlignmentOptions.Center;
 
+		SetControlsSubView(isTouchModeActive);
+		UpdateToggleVisuals(PlayerPrefs.GetInt("MobileControls_Enabled", 1) == 1);
 		UpdateMobileSettingsLabels();
+	}
+
+	void SetControlsSubView(bool showTouch)
+	{
+		isTouchModeActive = showTouch;
+
+		if (touchSettingsContent != null)
+		{
+			touchSettingsContent.SetActive(showTouch);
+		}
+
+		if (pcControlsScroll != null)
+		{
+			pcControlsScroll.gameObject.SetActive(!showTouch);
+		}
+
+		if (touchModeBtn != null)
+		{
+			touchModeBtn.GetComponent<Image>().sprite = showTouch ? GeoGame.UI.FlightUITheme.ButtonPrimarySprite : GeoGame.UI.FlightUITheme.ButtonNormalSprite;
+		}
+
+		if (physicalModeBtn != null)
+		{
+			physicalModeBtn.GetComponent<Image>().sprite = !showTouch ? GeoGame.UI.FlightUITheme.ButtonPrimarySprite : GeoGame.UI.FlightUITheme.ButtonNormalSprite;
+		}
+	}
+
+	void UpdateToggleVisuals(bool isEnabled)
+	{
+		bool isRTL = GeoGame.Localization.LocalizationManager.IsRightToLeftWritingSystem;
+		if (touchToggleBtnText != null)
+		{
+			if (isEnabled)
+			{
+				touchToggleBtnText.text = isRTL ? GeoGame.Localization.Arabic.ArabicFixer.Fix("✔ مفعل (ACTIVE)") : "✔ ACTIVE";
+				touchToggleBtnText.color = new Color(0.2f, 1f, 0.5f, 1f);
+			}
+			else
+			{
+				touchToggleBtnText.text = isRTL ? GeoGame.Localization.Arabic.ArabicFixer.Fix("✖ معطل (OFF)") : "✖ DISABLED";
+				touchToggleBtnText.color = new Color(1f, 0.4f, 0.4f, 1f);
+			}
+		}
+
+		if (mobileToggleBtnImg != null)
+		{
+			mobileToggleBtnImg.sprite = isEnabled ? GeoGame.UI.FlightUITheme.ButtonPrimarySprite : GeoGame.UI.FlightUITheme.ButtonDangerSprite;
+		}
 	}
 
 	void ApplyOpacityChange()
@@ -705,35 +893,56 @@ public class SettingsMenu : Menu
 		bool isRTL = GeoGame.Localization.LocalizationManager.IsRightToLeftWritingSystem;
 		var fontAsset = GeoGame.Localization.Arabic.ArabicFontManager.ArabicFontAsset;
 
-		TMP_Text hTxt = mobileSettingsCard.transform.Find("Header")?.GetComponent<TMP_Text>();
+		if (touchModeTxt != null)
+		{
+			if (isRTL && fontAsset != null) touchModeTxt.font = fontAsset;
+			touchModeTxt.text = isRTL ? GeoGame.Localization.Arabic.ArabicFixer.Fix("📱 أزرار اللمس") : "📱 Touch Controls";
+		}
+
+		if (physicalModeTxt != null)
+		{
+			if (isRTL && fontAsset != null) physicalModeTxt.font = fontAsset;
+			physicalModeTxt.text = isRTL ? GeoGame.Localization.Arabic.ArabicFixer.Fix("🎮 اليد ولوحة المفاتيح") : "🎮 Gamepad & Keys";
+		}
+
+		TextMeshProUGUI hTxt = mobileSettingsCard.transform.Find("TouchSettingsContent/Header")?.GetComponent<TextMeshProUGUI>();
 		if (hTxt != null)
 		{
 			if (isRTL && fontAsset != null) hTxt.font = fontAsset;
 			hTxt.text = isRTL ? GeoGame.Localization.Arabic.ArabicFixer.Fix("أزرار التحكم باللمس (موبايل)") : "MOBILE TOUCH CONTROLS";
 		}
 
-		TMP_Text subTxt = mobileSettingsCard.transform.Find("Subheader")?.GetComponent<TMP_Text>();
+		TextMeshProUGUI subTxt = mobileSettingsCard.transform.Find("TouchSettingsContent/Subheader")?.GetComponent<TextMeshProUGUI>();
 		if (subTxt != null)
 		{
 			if (isRTL && fontAsset != null) subTxt.font = fontAsset;
 			subTxt.text = isRTL ? GeoGame.Localization.Arabic.ArabicFixer.Fix("شاشة التحكم باللمس وعصا التوجيه الافتراضية") : "On-Screen Flight HUD & Virtual Joystick";
 		}
 
-		TMP_Text titleTxt = mobileSettingsCard.transform.Find("OpacityRow/Title")?.GetComponent<TMP_Text>();
+		TextMeshProUGUI togTitleTxt = mobileSettingsCard.transform.Find("TouchSettingsContent/ToggleRow/Title")?.GetComponent<TextMeshProUGUI>();
+		if (togTitleTxt != null)
+		{
+			if (isRTL && fontAsset != null) togTitleTxt.font = fontAsset;
+			togTitleTxt.text = isRTL ? GeoGame.Localization.Arabic.ArabicFixer.Fix("أزرار التحكم باللمس على الشاشة") : "Touch Controls HUD";
+		}
+
+		TextMeshProUGUI titleTxt = mobileSettingsCard.transform.Find("TouchSettingsContent/OpacityRow/Title")?.GetComponent<TextMeshProUGUI>();
 		if (titleTxt != null)
 		{
 			if (isRTL && fontAsset != null) titleTxt.font = fontAsset;
 			titleTxt.text = isRTL ? GeoGame.Localization.Arabic.ArabicFixer.Fix("شفافية الأزرار (Transient Level)") : "Button Opacity (Transient Level)";
 		}
 
-		TMP_Text guideTxt = mobileSettingsCard.transform.Find("GuideBox")?.GetComponent<TMP_Text>();
+		TextMeshProUGUI guideTxt = mobileSettingsCard.transform.Find("TouchSettingsContent/GuideBox/Txt")?.GetComponent<TextMeshProUGUI>();
 		if (guideTxt != null)
 		{
 			if (isRTL && fontAsset != null) guideTxt.font = fontAsset;
 			guideTxt.text = isRTL
-				? GeoGame.Localization.Arabic.ArabicFixer.Fix("• عصا توجيه ديناميكية: اسحب إصبعك في أي مكان على يسار الشاشة للتوجيه\n• أزرار الطيران: السرعة والتعزيز وإسقاط الصناديق على يمين الشاشة\n• شريط المهام: تبديل الكاميرا وخريطة العالم ثلاثية الأبعاد")
+				? GeoGame.Localization.Arabic.ArabicFixer.Fix("• عصا توجيه ديناميكية: اسحب إصبعك في أي مكان على يسار الشاشة للتوجيه والارتفاع\n• أزرار الطيران: السرعة والتعزيز وإسقاط الصناديق على يمين الشاشة\n• شريط المهام: تبديل الكاميرا وخريطة العالم ثلاثية الأبعاد والقائمة")
 				: "• Dynamic Steering: Touch & drag anywhere on left screen to steer\n• Flight Actions: Throttle, Boost, and Package Drop on right screen\n• Nav Bar: Cockpit Camera toggle, 3D Globe Map, and Systems Menu";
 		}
+
+		UpdateToggleVisuals(PlayerPrefs.GetInt("MobileControls_Enabled", 1) == 1);
 
 		if (mobileOpacityValueText != null)
 		{
