@@ -70,8 +70,10 @@ jobs:
 
       - name: Set up Swap Space
         run: |
-          echo "Configuring 6GB swapfile to provide memory headroom during C++ compilation..."
-          sudo fallocate -l 6G /swapfile || sudo dd if=/dev/zero of=/swapfile bs=1M count=6144
+          echo "Configuring 8GB swapfile to provide memory headroom during C++ compilation..."
+          sudo swapoff -a || true
+          sudo rm -f /swapfile
+          sudo fallocate -l 8G /swapfile || sudo dd if=/dev/zero of=/swapfile bs=1M count=8192
           sudo chmod 600 /swapfile
           sudo mkswap /swapfile
           sudo swapon /swapfile
