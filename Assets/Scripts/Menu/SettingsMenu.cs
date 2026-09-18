@@ -476,7 +476,7 @@ public class SettingsMenu : Menu
 	private ScrollRect pcControlsScroll;
 	private TextMeshProUGUI mobileOpacityValueText;
 	private TextMeshProUGUI touchToggleBtnText;
-	private Image touchToggleBtnImg;
+	private Image mobileToggleBtnImg;
 	private Button touchModeBtn;
 	private Button physicalModeBtn;
 	private TextMeshProUGUI touchModeTxt;
