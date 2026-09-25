@@ -47,6 +47,21 @@ public class GameController : MonoBehaviour
 			// 2x MSAA provides sharp edges while saving significant memory bandwidth over 4x on mobile GPUs
 			QualitySettings.antiAliasing = 2;
 
+			// Reduce pixel light count to save GPU fill-rate on mobile
+			QualitySettings.pixelLightCount = 2;
+
+			// Scale down rendering resolution to ~72% of native to massively reduce fill-rate
+			// Modern phones often have 2K+ screens which are far too expensive to render at native res
+			float mobileDpiFactor = 0.72f;
+			int scaledW = Mathf.Max(960, (int)(Screen.width * mobileDpiFactor));
+			int scaledH = Mathf.Max(540, (int)(Screen.height * mobileDpiFactor));
+			Screen.SetResolution(scaledW, scaledH, true);
+
+			// Reduce shadow draw distance and cascades on mobile
+			QualitySettings.shadowDistance = 80f;
+			QualitySettings.shadowCascades = 1;
+			QualitySettings.shadowResolution = ShadowResolution.Medium;
+
 			// Force landscape orientation on mobile
 			Screen.autorotateToPortrait = false;
 			Screen.autorotateToPortraitUpsideDown = false;

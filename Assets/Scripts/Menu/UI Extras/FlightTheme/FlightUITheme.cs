@@ -106,7 +106,9 @@ namespace GeoGame.UI
 		private void Update()
 		{
 			// Periodically scan for dynamically activated menus (e.g. Pause, Settings, Stats)
-			if (Time.frameCount % 45 == 0)
+			// On mobile, scan less frequently to reduce overhead from FindObjectsOfType / GetComponentsInChildren
+			int scanInterval = (Application.isMobilePlatform || SystemInfo.deviceType == DeviceType.Handheld) ? 120 : 45;
+			if (Time.frameCount % scanInterval == 0)
 			{
 				ThemeAllActiveUI();
 			}
@@ -151,6 +153,8 @@ namespace GeoGame.UI
 		private void ThemeButton(Button btn)
 		{
 			if (btn == null) return;
+			// Skip buttons inside the programmatic mobile controls settings card
+			if (IsInsideMobileSettingsCard(btn.transform)) return;
 			int id = btn.gameObject.GetInstanceID();
 
 			Image img = btn.GetComponent<Image>();
@@ -212,6 +216,8 @@ namespace GeoGame.UI
 		private void EnhanceButtonLabel(Button btn, bool isPrimary, bool isDanger, bool isArrow)
 		{
 			if (isArrow) return;
+			// Skip labels inside the mobile controls settings card
+			if (IsInsideMobileSettingsCard(btn.transform)) return;
 
 			TMP_Text tmp = btn.GetComponentInChildren<TMP_Text>(includeInactive: true);
 			if (tmp != null)
@@ -234,6 +240,17 @@ namespace GeoGame.UI
 			{
 				uTxt.color = Color.white;
 			}
+		}
+
+		private bool IsInsideMobileSettingsCard(Transform t)
+		{
+			Transform current = t;
+			while (current != null)
+			{
+				if (current.name == "MobileControlsSettingsCard") return true;
+				current = current.parent;
+			}
+			return false;
 		}
 
 		private void ThemePanel(Image img)

@@ -30,10 +30,14 @@ public class CountryHighlighting : MonoBehaviour
 			return;
 		}
 
+		// On mobile, dispatch compute shader every 3rd frame to save GPU time
+		bool isMobile = Application.isMobilePlatform || SystemInfo.deviceType == DeviceType.Handheld;
+		if (isMobile && Time.frameCount % 3 != 0) return;
+
 		Vector2 playerTexCoord = GeoMaths.PointToCoordinate((player.position + player.forward * lookaheadDst).normalized).ToUV();
 
 		compute.SetVector("playerTexCoord", playerTexCoord);
-		compute.SetFloat("deltaTime", Time.deltaTime);
+		compute.SetFloat("deltaTime", isMobile ? Time.deltaTime * 3f : Time.deltaTime);
 		compute.SetFloat("fadeInSpeed", 1f / Mathf.Max(0.001f, fadeInDuration));
 		compute.SetFloat("fadeOutSpeed", 1f / Mathf.Max(0.001f, fadeOutDuration));
 

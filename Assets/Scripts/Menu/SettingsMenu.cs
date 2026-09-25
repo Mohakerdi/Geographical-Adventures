@@ -422,6 +422,12 @@ public class SettingsMenu : Menu
 			}
 			SetUIFromSettings(lastAppliedSettings);
 			SetupMobileSettingsUI();
+
+			// On mobile, auto-switch to Controls tab so touch settings are immediately visible
+			if ((Application.isMobilePlatform || SystemInfo.deviceType == DeviceType.Handheld) && tabGroup != null)
+			{
+				tabGroup.ShowTab(2);
+			}
 		}
 	}
 
@@ -990,8 +996,11 @@ public struct Settings
 		// Note: since Unity remembers screen size / fullscreen mode automatically, just get current screen size
 		settings.screenSize = new Vector2Int(Screen.width, Screen.height);
 		settings.isFullscreen = Screen.fullScreen;
-		settings.terrainQuality = (TerrainQuality)PlayerPrefs.GetInt(nameof(terrainQuality), defaultValue: (int)TerrainQuality.High);
-		settings.shadowQuality = (ShadowQuality)PlayerPrefs.GetInt(nameof(shadowQuality), defaultValue: (int)ShadowQuality.High);
+		bool isMobileDevice = Application.isMobilePlatform || SystemInfo.deviceType == DeviceType.Handheld;
+		int defaultTerrain = isMobileDevice ? (int)TerrainQuality.Low : (int)TerrainQuality.High;
+		int defaultShadow = isMobileDevice ? (int)ShadowQuality.Low : (int)ShadowQuality.High;
+		settings.terrainQuality = (TerrainQuality)PlayerPrefs.GetInt(nameof(terrainQuality), defaultValue: defaultTerrain);
+		settings.shadowQuality = (ShadowQuality)PlayerPrefs.GetInt(nameof(shadowQuality), defaultValue: defaultShadow);
 
 		// Audio / Language
 		settings.languageID = PlayerPrefs.GetString(nameof(languageID));

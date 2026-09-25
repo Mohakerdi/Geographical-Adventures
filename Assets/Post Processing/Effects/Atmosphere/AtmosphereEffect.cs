@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Experimental.Rendering;
@@ -21,6 +21,8 @@ public class AtmosphereEffect : PostProcessingEffect
 
 	// Num raymarch steps when drawing aerial perspective (planet viewed through atmosphere)
 	public int numAerialScatteringSteps = 20;
+	// Reduced step count for mobile GPUs to save compute shader cost
+	public int numAerialScatteringStepsMobile = 8;
 
 
 	[Header("Rayleigh Scattering")]
@@ -65,6 +67,8 @@ public class AtmosphereEffect : PostProcessingEffect
 	[Header("Sky Texture")]
 	// Num raymarch steps when drawing the sky (this is drawn small and upscaled, so can afford to be fairly high)
 	public int numSkyScatteringSteps = 100;
+	// Reduced sky step count for mobile GPUs
+	public int numSkyScatteringStepsMobile = 30;
 	public ComputeShader skyRenderCompute;
 	// Note: since sky colours change quite smoothly this can be very small (e.g. 128x64)
 	// However, the vertical resolution should be increased (~128x256) so that earth shadow isn't too jaggedy
@@ -295,7 +299,8 @@ public class AtmosphereEffect : PostProcessingEffect
 
 		// Assign constant values
 		aerialPerspectiveLUTCompute.SetInt("size", aerialPerspectiveLUTSize);
-		aerialPerspectiveLUTCompute.SetInt("numScatteringSteps", numAerialScatteringSteps);
+		bool isMobile = Application.isMobilePlatform || SystemInfo.deviceType == DeviceType.Handheld;
+		aerialPerspectiveLUTCompute.SetInt("numScatteringSteps", isMobile ? numAerialScatteringStepsMobile : numAerialScatteringSteps);
 	}
 
 	void RenderAerialPerspectiveLUTs(Camera cam)
@@ -317,7 +322,8 @@ public class AtmosphereEffect : PostProcessingEffect
 
 		skyRenderCompute.SetTexture(0, "TransmittanceLUT", transmittanceLUT);
 		skyRenderCompute.SetTexture(0, "Sky", sky);
-		skyRenderCompute.SetInt("numScatteringSteps", numSkyScatteringSteps);
+		bool isMobileSky = Application.isMobilePlatform || SystemInfo.deviceType == DeviceType.Handheld;
+		skyRenderCompute.SetInt("numScatteringSteps", isMobileSky ? numSkyScatteringStepsMobile : numSkyScatteringSteps);
 		skyRenderCompute.SetInts("size", skyRenderSize.x, skyRenderSize.y);
 	}
 

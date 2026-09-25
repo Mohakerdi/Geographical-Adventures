@@ -97,8 +97,8 @@ public class RenderSettingsController : MonoBehaviour
 	void ApplyShadowSettings()
 	{
 		bool isMobile = Application.isMobilePlatform || SystemInfo.deviceType == DeviceType.Handheld;
-		QualitySettings.shadowResolution = isMobile ? ShadowResolution.High : shadowResolution;
-		QualitySettings.shadowDistance = shadowDrawDistance;
+		QualitySettings.shadowResolution = isMobile ? ShadowResolution.Medium : shadowResolution;
+		QualitySettings.shadowDistance = isMobile ? Mathf.Min(shadowDrawDistance, 80f) : shadowDrawDistance;
 	}
 
 
